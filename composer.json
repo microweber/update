@@ -1,0 +1,6 @@
+{
+  "name": "microweber/update",
+  "description": "System update",
+  "homepage": "https://microweber.org/",
+  "type": "microweber-core-update" 
+}
