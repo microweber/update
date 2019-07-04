@@ -126,6 +126,17 @@ if (!window.escape) {
     };
 }
 mw.tools = {
+    collision: function(el1, el2){
+        if(!el1 || !el2) return;
+        el1 = $(el1), el2 = $(el2);
+        var o1 = el1.offset();
+        var o2 = el2.offset();
+        o1.width = el1.width();
+        o1.height = el1.height();
+        o2.width = el2.width();
+        o2.height = el2.height();
+        return (o1.left < o2.left + o2.width  && o1.left + o1.width  > o2.left &&  o1.top < o2.top + o2.height && o1.top + o1.height > o2.top);
+    },
     iframeAutoHeight:function(frame){
         frame = mw.$(frame)[0];
         if(!frame) return;
@@ -874,7 +885,7 @@ mw.tools = {
             modal.main[0].querySelector('iframe').onload = function () {
                 typeof obj.callback === 'function' ? obj.callback.call(modal, this) : '';
                 typeof obj.onload === 'function' ? obj.onload.call(modal, this) : '';
-            }
+            };
             modal.iframe = modal.container.querySelector('iframe');
             return modal;
         },
@@ -2236,7 +2247,7 @@ mw.tools = {
     firstParentWithClass: function (el, cls) {
         if (!el) return false;
         var curr = el.parentNode;
-        while (curr !== mwd.body) {
+        while (curr && curr !== mwd.body) {
             if (curr.classList.contains(cls)) {
                 return curr;
             }
@@ -2454,14 +2465,14 @@ mw.tools = {
         }
     },
     scrollTo: function (el, callback, minus) {
-        var minus = minus || 0;
+        minus = minus || 0;
         if ($(el).length === 0) {
             return false;
         }
         if (typeof callback === 'number') {
-            var minus = callback;
+            minus = callback;
         }
-        mw.$('html,body').animate({scrollTop: $(el).offset().top - minus}, function () {
+        mw.$('html,body').stop().animate({scrollTop: $(el).offset().top - minus}, function () {
             typeof callback === 'function' ? callback.call(el) : '';
         });
     },
@@ -4815,6 +4826,16 @@ $(document).ready(function () {
         if(!mw.tools.hasAnyOfClassesOnNodeOrParent(e.target, ['mw-ui-dropdown'])){
             $(".mw-ui-dropdown.active").removeClass('active')
         }
+    });
+    $(document.body).on('click', 'a', function(e){
+        if(location.hash.indexOf('#mw@') !== -1 && (e.target.href || '').indexOf('#mw@') !== -1){
+            if(location.href === e.target.href){
+                var el = $('#' + e.target.href.split('mw@')[1])[0];
+                if(el){
+                    mw.tools.scrollTo(el)
+                }
+            }
+        }
     })
 
 
@@ -4826,10 +4847,10 @@ mw.ui.btn = {
             return false;
         }
         mw.tools.addClass(nav, 'activated');
-        var btn_selector = btn_selector || ".mw-ui-btn";
+        btn_selector = btn_selector || ".mw-ui-btn";
         var all = nav.querySelectorAll(btn_selector), i = 0, l = all.length, el;
         for (; i < l; i++) {
-            var el = all[i];
+            el = all[i];
             $(el).bind('click', function () {
                 if (!mw.tools.hasClass(this.className, 'active')) {
                     var active = nav.querySelector(btn_selector + ".active");
@@ -5645,7 +5666,11 @@ mw._colorPicker = function (options) {
 
         if ($el[0].nodeName == 'INPUT') {
             $el.on('focus', function (e) {
+                if(this.value){
+                    frame.color = this.value;
+                }
                 $(tip).show();
+
                 mw.tools.tooltip.setPosition(tip, $el[0], settings.position)
             });
         }
@@ -5655,8 +5680,11 @@ mw._colorPicker = function (options) {
                 mw.tools.tooltip.setPosition(tip, $el[0], settings.position)
             });
         }
-        $(document.body).on('click', function (e) {
-
+        var documents = [document];
+        if (self !== top){
+            documents.push(top.document);
+        }
+        $(documents).on('click', function (e) {
             if (!mw.tools.hasParentsWithClass(e.target, 'mw-tooltip') && e.target !== $el[0]) {
                 $(tip).hide();
             }
@@ -5922,7 +5950,7 @@ mw.uiAccordion = function (options) {
 
     var scope = this;
 
-    console.log(options)
+
 
     this.getContents = function () {
         this.contents = this.root.children(this.options.contentSelector);

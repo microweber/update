@@ -1,9 +1,11 @@
 <?php
 namespace Microweber\Utils\Backup;
 
+use Microweber\Utils\Backup\Loggers\BackupImportLogger;
+use Microweber\Utils\Backup\Loggers\BackupExportLogger;
+
 class BackupManager
 {
-	
 	public $exportAllData = false;
 	public $exportData = ['categoryIds'=>[], 'contentIds'=>[], 'tables'=>[]];
 	public $exportType = 'json';
@@ -21,12 +23,23 @@ class BackupManager
 			set_time_limit(0);
 		}
 	}
+	
+	/**
+	 * Set logger
+	 * @param class $logger
+	 */
+	public function setLogger($logger) {
+		
+		BackupImportLogger::setLogger($logger);
+		BackupExportLogger::setLogger($logger);
+		
+	}
 
 	/**
 	 * Set export full
 	 * @param string $type
 	 */
-	public function setExportAllData($exportAllData) {
+	public function setExportAllData($exportAllData = true) {
 		$this->exportAllData = $exportAllData;
 	}
 	
@@ -94,8 +107,7 @@ class BackupManager
 			return $export->start();
 		
 		} catch (\Exception $e) {
-			// dd($e);
-			return array("error"=>$e->getMessage());
+			return array("error"=>$e->getMessage(), "file"=>$e->getFile(), "code"=>$e->getCode(), "line"=>$e->getLine());
 		}
 
 	}
@@ -128,7 +140,7 @@ class BackupManager
 			return $writer->getImportLog();
 			
 		} catch (\Exception $e) {
-			return array("error"=>$e->getMessage());
+			return array("file"=>$e->getFile(), "line"=>$e->getLine(), "error"=>$e->getMessage());
 		}
 	}
 

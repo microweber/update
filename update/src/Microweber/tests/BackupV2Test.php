@@ -2,6 +2,8 @@
 namespace Microweber\tests;
 
 use Microweber\Utils\Backup\BackupManager;
+use Faker\Factory;
+use Microweber\Utils\Backup\EncodingFix;
 
 /**
  * Run test
@@ -11,31 +13,71 @@ use Microweber\Utils\Backup\BackupManager;
 
 class BackupV2Test extends TestCase
 {
-	public function testExport() {
+	private static $_titles = array();
+	private static $_exportedFile = '';
+	
+	public function testEncoding() {
+		
+		$locales = array('el_GR', 'bg_BG', 'en_EN','at_AT','ko_KR','kk_KZ','ja_JP','fi_FI','es_ES');
+		
+		foreach($locales as $locale) {
+			
+			$faker = Factory::create($locale);
+			
+			$inputTitle = $faker->name;
+			
+			if (empty($inputTitle)) {
+				$this->assertTrue(false);
+			} else {
+				$this->assertTrue(true);
+				
+				$contentId = save_content(array("title"=>$inputTitle));
+				$outputContent = get_content("single=true&id=" . $contentId);
+				
+				$this->assertSame($outputContent['title'], $inputTitle);
+				
+				self::$_titles[] = array("id"=>$contentId, "title"=>$inputTitle, "url"=>$outputContent['full_url']);
+			} 
+		}
+		
+		
+	}
+	
+	public function testFullExport() {
+		
+		clearcache();
 		
 		$manager = new BackupManager();
-		$manager->setExportType('zip');
-		$manager->setExportData('tables', array('media'));
-		$manager->setExportData('contentIds', array(1,2,3,4,5));
+		$manager->setExportAllData(true);
 		
 		$i = 0;
 		while (true) {
 			
-			$exportStatus = $manager->startExport();
-			 
-			if (isset($exportStatus['current_step'])) {
-				$this->assertArrayHasKey('current_step', $exportStatus);
-				$this->assertArrayHasKey('total_steps', $exportStatus);
-				$this->assertArrayHasKey('precentage', $exportStatus);
-				$this->assertArrayHasKey('data', $exportStatus);
+			$export =	$manager->startExport();
+			
+			$exportBool = false;
+			if (!empty($export)) {
+				$exportBool = true;
+			}
+			
+			$this->assertTrue($exportBool);
+			
+			if (isset($export['current_step'])) {
+				$this->assertArrayHasKey('current_step', $export);
+				$this->assertArrayHasKey('total_steps', $export);
+				$this->assertArrayHasKey('precentage', $export);
+				$this->assertArrayHasKey('data', $export);
 			}
 			
 			// The last exort step
-			if (isset($exportStatus['success'])) {
-				$this->assertArrayHasKey('data', $exportStatus);
-				$this->assertArrayHasKey('download', $exportStatus['data']);
-				$this->assertArrayHasKey('filepath', $exportStatus['data']);
-				$this->assertArrayHasKey('filename', $exportStatus['data']);
+			if (isset($export['success'])) {
+				$this->assertArrayHasKey('data', $export);
+				$this->assertArrayHasKey('download', $export['data']);
+				$this->assertArrayHasKey('filepath', $export['data']);
+				$this->assertArrayHasKey('filename', $export['data']);
+				
+				self::$_exportedFile = $export['data']['filepath'];
+				
 				break;
 			}
 			
@@ -45,22 +87,51 @@ class BackupV2Test extends TestCase
 			
 			$i++;
 		}
-		
-		
 	}
 	
-	public function testImport() {
+	public function testImportZipFile() {
+		
+		foreach(get_content('no_limit=1&content_type=post') as $content) {
+			//echo 'Delete content..' . PHP_EOL;
+			$this->assertArrayHasKey(0, delete_content(array('id'=>$content['id'], 'forever'=>true)));
+		}
 		
 		$manager = new BackupManager();
-		$manager->setImportFile(storage_path('backup_v2_test.json'));
-		$manager->setImportType('json');
+		$manager->setImportFile(self::$_exportedFile);
 		$manager->setImportBatch(false);
 		
-		$importStatus = $manager->startImport();
+		$import = $manager->startImport();
 		
-		// var_dump($importStatus);
+		$importBool = false;
+		if (!empty($import)) {
+			$importBool = true;
+		}
 		
-		$this->assertArrayHasKey('success', $importStatus);
+		$this->assertTrue($importBool);
+		
+		$this->assertArrayHasKey('done', $import);
+		$this->assertArrayHasKey('precentage', $import);
+	}
+	
+	public function testImportedEncoding() {
+		
+		$urls = array();
+		foreach (self::$_titles as $title) {
+			$urls[$title['url']] = $title;
+		}
+
+		$contents = get_content('no_limit=1&content_type=post');
+		
+		if (empty($contents)) {
+			$this->assertTrue(false);
+			return;
+		}
+		
+		foreach($contents as $content) {
+			if (array_key_exists($content['url'], $urls)) {
+				$this->assertSame($urls[$content['url']]['title'], $content['title']);
+			}
+		}
 	}
 	
 	public function testImportWrongFile() {
@@ -71,18 +142,14 @@ class BackupV2Test extends TestCase
 		
 		$importStatus = $manager->startImport();
 		
-		//var_dump($importStatus);
-		
 		$this->assertArrayHasKey('error', $importStatus);
 	}
 	
 	public function testExportWithWrongFormat()
 	{
 		$export = new BackupManager();
-		$export->setExportType('xmla');
+		$export->setExportType('xml_');
 		$exportStatus = $export->startExport();
-		
-		//var_dump($exportStatus);
 		
 		$this->assertArrayHasKey('error', $exportStatus);
 	}

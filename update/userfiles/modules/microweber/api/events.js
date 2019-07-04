@@ -113,6 +113,21 @@ DOMChange:function(element, callback, attr, a){
     attr = attr || false;
     a = a || false;
 
+    element.addEventListener("input", function(e){
+        if( !mw.on.DOMChangePause ) {
+            if(!a){
+                callback.call(this);
+            }
+            else{
+                clearTimeout(element._int);
+                element._int = setTimeout(function(){
+                    callback.call(element);
+                }, mw.on.DOMChangeTime);
+            }
+
+        }
+    }, false);
+
     var MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver;
 
     if(typeof MutationObserver === 'function'){
@@ -132,7 +147,7 @@ DOMChange:function(element, callback, attr, a){
                     callback.call(this);
                 }
                 else{
-                    clearInterval(element._int);
+                    clearTimeout(element._int);
                     element._int = setTimeout(function(){
                         callback.call(element);
                     }, mw.on.DOMChangeTime);
@@ -150,7 +165,7 @@ DOMChange:function(element, callback, attr, a){
                     callback.call(this);
                 }
                 else{
-                    clearInterval(element._int);
+                    clearTimeout(element._int);
                     element._int = setTimeout(function(){
                         callback.call(element);
                     }, mw.on.DOMChangeTime);
@@ -168,7 +183,7 @@ DOMChange:function(element, callback, attr, a){
                             callback.call(this);
                         }
                         else{
-                            clearInterval(element._int);
+                            clearTimeout(element._int);
                             element._int = setTimeout(function(){
                                 callback.call(element);
                             }, mw.on.DOMChangeTime);
@@ -192,13 +207,13 @@ DOMChange:function(element, callback, attr, a){
  },
  scrollBarOnBottom : function(obj, distance, callback){
     if(typeof obj === 'function'){
-       var callback = obj;
-       var obj =  window;
-       var distance = 0;
+       callback = obj;
+       obj =  window;
+       distance = 0;
     }
     if(typeof distance === 'function'){
-      var callback = distance;
-      var distance = 0;
+      callback = distance;
+      distance = 0;
     }
     obj._pauseCallback = false;
     obj.pauseScrollCallback = function(){ obj._pauseCallback = true;}
@@ -278,18 +293,27 @@ mw.hashHistory = [window.location.hash]
 mw.prevHash = function(){
   var prev = mw.hashHistory[mw.hashHistory.length - 2];
   return prev !== undefined ? prev : '';
-}
+};
 
 
 
-$(window).bind("hashchange load", function(event){
+$(window).on("hashchange load", function(event){
     if(event.type === 'load'){
         mw._on.userIteractionInit();
     }
 
-mw.on.hashParamEventInit();
+    mw.on.hashParamEventInit();
 
    var hash =  mw.hash();
+
+   var isMWHash = hash.replace(/\#/g, '').indexOf('mw@') === 0;
+   if (isMWHash) {
+       var MWHash = hash.replace(/\#/g, '').replace('mw@', '');
+       var el = document.getElementById(MWHash);
+       if(el) {
+           mw.tools.scrollTo(el);
+       }
+   }
    if(hash.contains("showpostscat")){
       mw.$("html").addClass("showpostscat");
    }

@@ -24,8 +24,9 @@ var ActiveNode = null;
 var CSSShadow;
 
 var _activeTree = null;
+var _pauseActiveTree = false;
 var activeTree = function(){
-    if(!ActiveNode) {
+    if(!ActiveNode || _pauseActiveTree) {
         return;
     }
     var getParent = function(node){
@@ -41,14 +42,29 @@ var activeTree = function(){
         }
     };
     var data = [], curr = ActiveNode;
-    while(curr && curr !== document.body && !mw.tools.hasClass(curr, 'edit')){
-        if(curr.id){
+    while(curr && curr !== document.body){
+        var custom = !!curr.className;
+        if(curr.id || mw.tools.hasClass(curr, 'edit') || custom){
             var parent = getParent(curr);
+            var selector = mw.tools.generateSelectorForNode(curr)
+                .replace(/\[/g, 'mw')
+                .replace(/["']/g, '')
+                .replace(/\]/g, 'mw');
+            var parent_selector = 0;
+
+            if(parent) {
+                parent_selector =  mw.tools.generateSelectorForNode(parent)
+                    .replace(/\[/g, 'mw')
+                    .replace(/["']/g, '')
+                    .replace(/\]/g, 'mw');
+            }
             var item = {
-                id: curr.id,
+                id: selector,
                 type: 'page',
-                title: curr.tagName.toLowerCase() + '#' + curr.id,
-                parent_id: parent ? parent.id : 0
+                title: curr.tagName.toLowerCase() + (curr.classList.length ? ('.' + curr.className.split(' ').join('.')) : '') ,
+                parent_id: parent_selector,
+                parent_type: 'page',
+                element: curr
             };
 
             data.push(item)
@@ -68,11 +84,28 @@ var activeTree = function(){
 
     $('#tree').empty();
 
+
+
     _activeTree = new mw.tree({
         element:'#tree',
         data:data,
-        saveState: false
+        saveState: false,
+        selectable: true,
+        singleSelect:true,
     });
+
+    _activeTree.openAll();
+    _activeTree.select($('#tree li:last')[0]);
+
+    $(_activeTree).on('selectionChange', function(e, data){
+        _pauseActiveTree = true;
+        if(data[0]){
+            top.mw.liveEditSelector.select(data[0].element);
+        }
+        setTimeout(function(){
+            _pauseActiveTree = false;
+        }, 10)
+    })
 
 
 };
@@ -295,9 +328,11 @@ top.$(top.mw.liveEditSelector).on('select', function(e, nodes){
 
     $(document).ready(function(){
 
+        mw.$('.mw-field input').attr('autocomplete', 'off')
+
         top.$(top.mwd.body).on('mousedown touchstart', function(e){
             var node = mw.tools.firstMatchesOnNodeOrParent(e.target, ['.element', '.module']);
-            if( !node ){
+            if( !node && !mw.tools.firstParentOrCurrentWithAnyOfClasses(e.target, ['mw-control-box', 'mw-defaults']) ){
                 ActiveNode = null;
             }
         });

@@ -44,7 +44,14 @@ if( $id != 0){
 
 ?>
 <?php  $rand = uniqid(); ?>
-<?php if(isset($data) and $data != false): ?>
+
+
+
+
+
+
+
+
 <script  type="text/javascript">
     mw.require('forms.js', true);
 </script>
@@ -54,23 +61,38 @@ if( $id != 0){
 <script  type="text/javascript">
     mw.menu_curenlty_editing_item_id = false;
 
-    mw.menu_save_new_item = function(selector){
-        var data = mw.form.serialize(selector)
+    var saving = false;
 
-        $.post( "<?php print api_link('content/menu_item_save'); ?>",data, function( msg ) {
+    mw.menu_save_new_item = function(selectorOrData){
+        mw.tools.loading(mwd.querySelector('#settings-main'), 90);
+        if(saving) return;
+        saving = true;
+        var data;
+        if(typeof selectorOrData === 'string' || mw.$(selectorOrData)[0].nodeName) {
+            data = mw.form.serialize(selectorOrData);
+        } else {
+            data = selectorOrData;
+        }
 
-
-
+        return $.post( "<?php print api_link('content/menu_item_save'); ?>",data, function( msg ) {
             if(mw.notification != undefined){
                 mw.notification.success('<?php _e('Menu changes are saved'); ?>');
             }
-
+            mw.tools.loading(mwd.querySelector('#settings-main'), false);
             mw.menu_item_after_save();
+            saving = false;
+
         });
     };
 
     mw.menu_item_after_save = function(){
-        mw.reload_module_parent('menu')
+        mw.reload_module_parent('menu');
+        $('#layout_link_controller').hide();
+        var layoutRadio = $('#layout_link_controller input:checked')[0];
+        if (layoutRadio) {
+            layoutRadio.checked = false;
+            $('#ltext').val('');
+        }
 
         if(mw.menu_curenlty_editing_item_id == false){
             mw.reload_module('menu/edit_items');
@@ -82,7 +104,7 @@ if( $id != 0){
 
             }
 
-         }
+        }
 
     };
     mw.menu_item_delete = function($item_id){
@@ -103,8 +125,8 @@ if( $id != 0){
 
             var master = mw.tools.firstParentWithClass(node, 'mw-modules-admin');
 
-             mw.$('li .active', master).removeClass('active');
-             mw.$('ul .active', master).removeClass('active');
+            mw.$('li .active', master).removeClass('active');
+            mw.$('ul .active', master).removeClass('active');
 
             $(node.parentNode).addClass('active');
             $(node.parentNode).parent().addClass('opened');
@@ -182,6 +204,13 @@ if( $id != 0){
         mw.menu_items_sort_<?php print $rand; ?>();
     });
 </script>
+
+
+
+
+
+<?php if(isset($data) and $data != false): ?>
+
 
 <div class="menu-module-wrapper">
     <style type="text/css" scoped="scoped">

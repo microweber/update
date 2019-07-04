@@ -1,7 +1,5 @@
 <?php
 
- 
-
 if (!isset($data['id'])) {
 include('empty_field_vals.php');
 }
@@ -34,7 +32,7 @@ if(!isset($data['input_class'])){
       <div class="mw-ui-col" style="width: auto">
 
       <span class="mw-ui-btn" id="upload_button_<?php print($rand); ?>">
-        <span class="mw-icon-upload"></span><?php _e("Browse"); ?>
+        <span class="mw-icon-upload"></span>&nbsp; <?php _e("Browse"); ?>
         </span>
         <input type="hidden" class="mw-ui-invisible-field" id="file_name<?php print $data["name"]; ?>" autocomplete="off"  />
         
@@ -56,13 +54,7 @@ if(!isset($data['input_class'])){
     mw.require('files.js');
 </script> 
 <script>
-
-    formHasUploader = true;
-
-
-
-
-
+formHasUploader = true;
 
 $(document).ready(function(){
 	 

@@ -1,6 +1,8 @@
 <?php
 namespace Microweber\Utils\Backup\Exporters;
 
+use Microweber\Utils\Backup\EncodingFix;
+
 class JsonExport extends DefaultExport
 {
 
@@ -17,6 +19,9 @@ class JsonExport extends DefaultExport
 
 	public function getDump()
 	{
-		return json_encode($this->data, JSON_PRETTY_PRINT);
+		return json_encode(EncodingFix::encode($this->data));
 	}
+	
 }
+
+

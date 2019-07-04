@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit0526afcdbe4d2d836b43969616ddef8c
+class ComposerStaticInit62e72493b93b91c827ee5bdd577d35cc
 {
     public static $files = array (
         '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
@@ -19,6 +19,8 @@ class ComposerStaticInit0526afcdbe4d2d836b43969616ddef8c
         '2c102faa651ef8ea5874edb585946bce' => __DIR__ . '/..' . '/swiftmailer/swiftmailer/lib/swift_required.php',
         '8a9dc1de0ca7e01f3e08231539562f61' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/functions.php',
         '667aeda72477189d0494fecd327c3641' => __DIR__ . '/..' . '/symfony/var-dumper/Resources/functions/dump.php',
+        '9c67151ae59aff4788964ce8eb2a0f43' => __DIR__ . '/..' . '/clue/stream-filter/src/functions_include.php',
+        '8cff32064859f4559445b89279f3199c' => __DIR__ . '/..' . '/php-http/message/src/filters.php',
         'f0906e6318348a765ffb6eb24e0d0938' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Foundation/helpers.php',
         '58571171fd5812e6e447dce228f52f4d' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Support/helpers.php',
         'e803af0597ea9e5b518c7d090fb85601' => __DIR__ . '/..' . '/arcanedev/support/constants.php',
@@ -110,6 +112,7 @@ class ComposerStaticInit0526afcdbe4d2d836b43969616ddef8c
             'MaxMind\\WebService\\' => 19,
             'MaxMind\\Exception\\' => 18,
             'MaxMind\\Db\\' => 11,
+            'MailerLiteApi\\' => 14,
         ),
         'L' => 
         array (
@@ -135,6 +138,14 @@ class ComposerStaticInit0526afcdbe4d2d836b43969616ddef8c
             'Intervention\\Image\\' => 19,
             'Illuminate\\' => 11,
         ),
+        'H' => 
+        array (
+            'Http\\Promise\\' => 13,
+            'Http\\Message\\' => 13,
+            'Http\\Discovery\\' => 15,
+            'Http\\Client\\Curl\\' => 17,
+            'Http\\Client\\' => 12,
+        ),
         'G' => 
         array (
             'GuzzleHttp\\Psr7\\' => 16,
@@ -147,6 +158,7 @@ class ComposerStaticInit0526afcdbe4d2d836b43969616ddef8c
         'F' => 
         array (
             'FontLib\\' => 8,
+            'Finlet\\flexmail\\' => 16,
         ),
         'D' => 
         array (
@@ -169,6 +181,7 @@ class ComposerStaticInit0526afcdbe4d2d836b43969616ddef8c
             'Composer\\' => 9,
             'Collective\\Html\\' => 16,
             'Coduo\\PHPHumanizer\\Tests\\' => 25,
+            'Clue\\StreamFilter\\' => 18,
         ),
         'A' => 
         array (
@@ -432,6 +445,10 @@ class ComposerStaticInit0526afcdbe4d2d836b43969616ddef8c
         array (
             0 => __DIR__ . '/..' . '/maxmind-db/reader/src/MaxMind/Db',
         ),
+        'MailerLiteApi\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/mailerlite/mailerlite-api-v2-php-sdk/src',
+        ),
         'League\\OAuth1\\' => 
         array (
             0 => __DIR__ . '/..' . '/league/oauth1-client/src',
@@ -480,6 +497,27 @@ class ComposerStaticInit0526afcdbe4d2d836b43969616ddef8c
         array (
             0 => __DIR__ . '/..' . '/laravel/framework/src/Illuminate',
         ),
+        'Http\\Promise\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/php-http/promise/src',
+        ),
+        'Http\\Message\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/php-http/message-factory/src',
+            1 => __DIR__ . '/..' . '/php-http/message/src',
+        ),
+        'Http\\Discovery\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/php-http/discovery/src',
+        ),
+        'Http\\Client\\Curl\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/php-http/curl-client/src',
+        ),
+        'Http\\Client\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/php-http/httplug/src',
+        ),
         'GuzzleHttp\\Psr7\\' => 
         array (
             0 => __DIR__ . '/..' . '/guzzlehttp/psr7/src',
@@ -507,6 +545,10 @@ class ComposerStaticInit0526afcdbe4d2d836b43969616ddef8c
         'FontLib\\' => 
         array (
             0 => __DIR__ . '/..' . '/phenx/php-font-lib/src/FontLib',
+        ),
+        'Finlet\\flexmail\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/finlet/flexmail/src',
         ),
         'Dotenv\\' => 
         array (
@@ -571,6 +613,10 @@ class ComposerStaticInit0526afcdbe4d2d836b43969616ddef8c
         'Coduo\\PHPHumanizer\\Tests\\' => 
         array (
             0 => __DIR__ . '/..' . '/coduo/php-humanizer/tests',
+        ),
+        'Clue\\StreamFilter\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/clue/stream-filter/src',
         ),
         'Aws\\' => 
         array (
@@ -718,11 +764,11 @@ class ComposerStaticInit0526afcdbe4d2d836b43969616ddef8c
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit0526afcdbe4d2d836b43969616ddef8c::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit0526afcdbe4d2d836b43969616ddef8c::$prefixDirsPsr4;
-            $loader->fallbackDirsPsr4 = ComposerStaticInit0526afcdbe4d2d836b43969616ddef8c::$fallbackDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit0526afcdbe4d2d836b43969616ddef8c::$prefixesPsr0;
-            $loader->classMap = ComposerStaticInit0526afcdbe4d2d836b43969616ddef8c::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit62e72493b93b91c827ee5bdd577d35cc::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit62e72493b93b91c827ee5bdd577d35cc::$prefixDirsPsr4;
+            $loader->fallbackDirsPsr4 = ComposerStaticInit62e72493b93b91c827ee5bdd577d35cc::$fallbackDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit62e72493b93b91c827ee5bdd577d35cc::$prefixesPsr0;
+            $loader->classMap = ComposerStaticInit62e72493b93b91c827ee5bdd577d35cc::$classMap;
 
         }, null, ClassLoader::class);
     }

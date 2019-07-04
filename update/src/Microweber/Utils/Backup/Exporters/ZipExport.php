@@ -45,7 +45,7 @@ class ZipExport extends DefaultExport
 	}
 	
 	public function start() {
-		
+
 		if ($this->getCurrentStep() == 0) {
 			// Clear old log file
 			BackupExportLogger::clearLog();
@@ -53,8 +53,6 @@ class ZipExport extends DefaultExport
 		
 		// Get zip filename
 		$zipFileName = $this->_getZipFileName();
-		
-		// var_dump($zipFileName);
 		
 		BackupExportLogger::setLogInfo('Archiving files batch: ' . $this->getCurrentStep() . '/' . $this->totalSteps);
 		
@@ -66,6 +64,9 @@ class ZipExport extends DefaultExport
                 \nCreated on " . date('l jS \of F Y h:i:s A'));
 		
 		if ($this->getCurrentStep() == 0) {
+			
+			BackupExportLogger::setLogInfo('Start new importing..');
+			
 			// Encode db json
 			$json = new JsonExport($this->data);
 			$getJson = $json->start();
@@ -74,35 +75,56 @@ class ZipExport extends DefaultExport
 			if ($getJson['filepath']) {
 				$zip->addFile($getJson['filepath'], 'mw_content.json');
 			}
+			
 		}
 		
 		$userFiles = $this->_getUserFilesPaths();
-		if (!empty($userFiles)) {
+		
+		if (empty($userFiles)) {
 			
-			$totalUserFilesForZip = sizeof($userFiles);
-			$totalUserFilesForBatch = round($totalUserFilesForZip / $this->totalSteps, 0);
-			
-			$userFilesBatch = array_chunk($userFiles, $totalUserFilesForBatch);
-			
-			if (!isset($userFilesBatch[$this->getCurrentStep()])) {
-				
-				BackupExportLogger::setLogInfo('No files in batch for current step.');
-				$this->_finishUp();
-				
-				return $zipFileName;
-			}
-			
-			foreach($userFilesBatch[$this->getCurrentStep()] as $file) {
-				BackupExportLogger::setLogInfo('Archiving file <b>'. $file['dataFile'] . '</b>');
-				$zip->addFile($file['filePath'], $file['dataFile']);
-			}
-			
+			$zip->setCompressionIndex(0, \ZipArchive::CM_STORE);
 			$zip->close();
 			
-			cache_save($this->getCurrentStep() + 1, 'ExportCurrentStep', $this->_cacheGroupName, 60 * 10);
+			BackupExportLogger::setLogInfo('No userfiles..');
+			$this->_finishUp();
+			
+			return $zipFileName;
 		}
 		
-		return $this->getExportLog();
+		$totalUserFilesForZip = sizeof($userFiles);
+		$totalUserFilesForBatch = round($totalUserFilesForZip / $this->totalSteps, 0);
+		
+		if ($totalUserFilesForBatch > 0) {
+			$userFilesBatch = array_chunk($userFiles, $totalUserFilesForBatch);
+		} else {
+			$userFilesBatch = array();
+			$userFilesBatch[] = $userFiles;
+		}
+		
+		if (!isset($userFilesBatch[$this->getCurrentStep()])) {
+			
+			BackupExportLogger::setLogInfo('No files in batch for current step.');
+			$this->_finishUp();
+			
+			return $zipFileName;
+		}
+		
+		foreach($userFilesBatch[$this->getCurrentStep()] as $file) {
+			BackupExportLogger::setLogInfo('Archiving file <b>'. $file['dataFile'] . '</b>');
+			$zip->addFile($file['filePath'], $file['dataFile']);
+		}
+        
+		if (method_exists($zip, 'setCompressionIndex')) {
+		    $zip->setCompressionIndex(0, \ZipArchive::CM_STORE);
+        }
+        
+		$zip->close();
+		
+		$exportLog = $this->getExportLog();
+		
+		cache_save($this->getCurrentStep() + 1, 'ExportCurrentStep', $this->_cacheGroupName, 60 * 10);
+		
+		return $exportLog;
 	}
 	
 	public function getExportLog() {
@@ -110,7 +132,7 @@ class ZipExport extends DefaultExport
 		$log = array();
 		$log['current_step'] = $this->getCurrentStep();
 		$log['total_steps'] = $this->totalSteps;
-		$log['precentage'] = ($this->getCurrentStep() * 100) / $this->totalSteps;
+		$log['precentage'] = number_format((($this->getCurrentStep() * 100) / $this->totalSteps), 2);
 		$log['data'] = false;
 		
 		if ($this->getCurrentStep() >= $this->totalSteps) {
@@ -129,8 +151,19 @@ class ZipExport extends DefaultExport
 		$userFiles = array();
 		$userFilesReady = array();
 		
-		$css = $this->_getDirContents(userfiles_path() . DIRECTORY_SEPARATOR . 'css');
-		$media = $this->_getDirContents(userfiles_path() . DIRECTORY_SEPARATOR . 'media');
+		$userFilesPathCss = userfiles_path() . DIRECTORY_SEPARATOR . 'css';
+		$userFilesPathMedia = userfiles_path() . DIRECTORY_SEPARATOR . 'media';
+		
+		if (!is_dir($userFilesPathCss)) {
+			mkdir_recursive($userFilesPathCss);
+		}
+		
+		if (!is_dir($userFilesPathMedia)) {
+			mkdir_recursive($userFilesPathMedia);
+		}
+		
+		$css = $this->_getDirContents($userFilesPathCss);
+		$media = $this->_getDirContents($userFilesPathMedia);
 		
 		$userFiles = array_merge($css, $media);
 		
@@ -153,6 +186,10 @@ class ZipExport extends DefaultExport
 	}
 	
 	private function _getDirContents($path) {
+		
+		if (!is_dir($path)) {
+			return array();
+		}
 		
 		$rii = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path));
 

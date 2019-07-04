@@ -129,7 +129,7 @@
 
         <?php endif; ?>
 
-        if (typeof thismodal == 'undefined' && self !== parent && typeof this.name != 'undefined' && this.name != '') {
+        if (typeof thismodal === 'undefined' && self !== parent && typeof this.name != 'undefined' && this.name != '') {
             var frame = parent.mw.$('#' + this.name)[0];
             thismodal = parent.mw.tools.modal.get(mw.tools.firstParentWithClass(frame, 'mw_modal'));
         }
@@ -352,7 +352,7 @@
 
                             var mod_presets_iframe_html_fr = '' +
                                 '<div class="js-module-presets-edit-frame">' +
-                                '<iframe src="' + src + '" frameborder="0" style="overflow: hidden;" width="280" height="400" onload="this.parentNode.classList.remove(\'loading\')">' +
+                                '<iframe src="' + src + '" frameborder="0" style="overflow: hidden;" width="280" height="400" onload="this.parentNode.classList.remove(\'loading\')"></iframe>' +
                                 '</div>';
 
                             window.parent.$('#module-modal-settings-menu-items-presets-holder<?php print $params['id'] ?>').html(mod_presets_iframe_html_fr);

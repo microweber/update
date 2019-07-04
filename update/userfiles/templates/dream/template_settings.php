@@ -2,18 +2,22 @@
 
     $(document).ready(function () {
         mw.options.form("#settings-holder", function () {
-            mw.notification.success("<?php _e("Template settings are saved"); ?>.");
-
-            parent.$("#theme-style").attr('href', '<?php print mw()->template->get_stylesheet('assets/less/theme.less', 'mw-template-dream-style-vars', false); ?>');
-
-            /* parent.$("#theme-style").each(function(){
-             mw.tools.refresh(this)
-             }); */
-
-            mw.tools.refresh(window.parent.getElementById('theme-style'))
-
+            reloadTemplate();
         });
     });
+
+    function reloadTemplate() {
+        mw.notification.success("<?php _e("Template settings are saved"); ?>.");
+
+        parent.$("#theme-style").attr('href', '<?php print mw()->template->get_stylesheet('assets/less/theme.less', 'mw-template-dream-style-vars', false); ?>');
+
+        /* parent.$("#theme-style").each(function(){
+         mw.tools.refresh(this)
+         }); */
+
+        mw.tools.refresh(parent.$("#theme-style"));
+    }
+
 </script>
 
 <div id="settings-holder">
@@ -163,6 +167,14 @@
                 window.top.$("nav .nav-bar")[this.checked ? 'removeClass' : 'addClass']('nav--absolute nav--transparent')
             });
         });
+        function deleteCompiledCSS() {
+            $.get(mw.settings.api_url + "template/delete_compiled_css?path=assets/less/theme.less&option_group=mw-template-dream-style-vars", function () {
+                // Delete
+                reloadTemplate();
+                window.parent.mw.drag.save();
+                window.parent.location.reload(false);
+            });
+        }
     </script>
 
     <div class="bootstrap3ns">
@@ -427,8 +439,12 @@
             </div>
         </div>
 
-
         <?php
+        $bg_white = get_option('bg-white', 'mw-template-dream-style-vars');
+        if ($bg_white == '') {
+            $bg_white = '#fff';
+        }
+
         $color_bg_site = get_option('color-bg-site', 'mw-template-dream-style-vars');
         if ($color_bg_site == '') {
             $color_bg_site = '#F8F8F8';
@@ -583,12 +599,27 @@
                         $('input[name="color-heading"]').trigger('change');
                     }
                 });
+
+                mw.colorPicker({
+                    element: '#bg_white',
+                    position: 'bottom-left',
+                    onchange: function (color) {
+                        $('#bg_white').css('background', color);
+                        $('input[name="bg-white"]').val(color);
+                        $('input[name="bg-white"]').trigger('change');
+                    }
+                });
             });
         </script>
 
         <div class="form-group">
             <label for="select" class="mw-ui-label">Color scheme</label>
             <div>
+                <div class="theme-color-selector">
+                    <button style="background: <?php print  $bg_white ?>;" id="bg_white"></button>
+                    <input class="mw-ui-field mw_option_field hidden" name="bg-white" value="<?php print $bg_white ?>" data-option-group="mw-template-dream-style-vars" placeholder="Eneter color..">
+                    White Background
+                </div>
                 <div class="theme-color-selector">
                     <button style="background: <?php print  $color_bg_site ?>;" id="color_bg_site"></button>
                     <input class="mw-ui-field mw_option_field hidden" name="color-bg-site" value="<?php print $color_bg_site ?>" data-option-group="mw-template-dream-style-vars" placeholder="Eneter color..">
@@ -712,6 +743,11 @@
         <div class="form-group">
             <label class="mw-ui-label">Inputs Border Width</label>
             <input class="mw-ui-field mw_option_field" name="border-width" value="<?php print $border_width ?>" data-option-group="mw-template-dream-style-vars" placeholder="2px">
+        </div>
+
+
+        <div class="form-group">
+            <span class="mw-ui-btn mw-ui-btn-medium right" onclick="deleteCompiledCSS();" style="margin-top: 4px;"><?php _e("Reset Template Settings"); ?></span>
         </div>
     </div>
 </div>
