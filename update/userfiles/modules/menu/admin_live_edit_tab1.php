@@ -3,6 +3,20 @@
     mw.require('forms.js', true);
     mw.require('url.js', true);
 </script>
+
+
+<script  type="text/javascript">
+    mw.require('forms.js', true);
+</script>
+<script  type="text/javascript">
+    mw.require('<?php print $config['url_to_module'] ?>jquery.mjs.nestedSortable.js', true);
+    mw.require('<?php print $config['url_to_module'] ?>menu_admin.js', true);
+</script>
+
+
+
+
+
 <style>
     #layout_link_controller{
         padding: 20px 0;
@@ -14,7 +28,7 @@
     .page-layout-tab .mw-field{
         width: 100%;
     }
-    .mw-ui-btn + .mw-ui-btn{
+    .admin-side-content .mw-ui-btn + .mw-ui-btn{
         margin-left: 10px;
     }
 </style>
@@ -272,6 +286,10 @@
     }*/
     }
 </script>
+
+
+
+
 <?php $menus = get_menus(); ?>
 <?php
 if (!isset($menu_name)) {
@@ -429,7 +447,7 @@ if ($menu_data) {
                     var selected = $('#layouts-selector input:checked');
                     var val = top.location.href.split('#')[0] + '#mw@' + selected[0].id;
 
-                    mw.menu_save_new_item({
+                    mw.menu_admin.save_item({
                         title: $('#ltext').val(),
                         url: val,
                         parent_id: currentMenuId
@@ -458,7 +476,7 @@ if ($menu_data) {
                         elements_count++;
                     });
 
-  
+
                     if(elements_count != 0){
 
                         $('#request-section-link-toggle').show();
@@ -489,7 +507,7 @@ if ($menu_data) {
 
         <input type="hidden" name="parent_id" id="add-custom-link-parent-id" class="add-custom-link-parent-id"
                value="<?php print $menu_id; ?>"/>
-        <button class="mw-ui-btn mw-ui-btn-info pull-right" onclick="mw.menu_save_new_item('#custom_link_controller');">
+        <button class="mw-ui-btn mw-ui-btn-info pull-right" onclick="mw.menu_admin.save_item('#custom_link_controller');">
             <?php _e("Add to menu"); ?>
         </button>
     </div>

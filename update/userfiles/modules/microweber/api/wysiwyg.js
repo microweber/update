@@ -1767,13 +1767,16 @@ mw.wysiwyg = {
     },
     link: function (prepolulate, node_id) {
         // mw.wysiwyg.save_selection();
-        var modal = mw.tools.modal.frame({
+        //var modal = mw.tools.modal.frame({
+        var modal = mw.dialogIframe({
             url: "rte_link_editor",
             title: "Edit link",
             name: "mw_rte_link",
+            id: "mw_rte_link",
             //template: 'basic',
             width: 600,
-            height: 300
+            height: 'auto',
+            autoHeight: true
         });
         mw.$('iframe', modal.main).on('change', function (a, b, c, e) {
             mw.iframecallbacks[b](c, e);
@@ -1856,7 +1859,7 @@ mw.wysiwyg = {
         var url = !!types ? "rte_image_editor?types=" + types + '' + hash : "rte_image_editor" + hash;
 
         var url = mw.settings.site_url + 'editor_tools/' + url;
-        var modal = mw.tools.modal.frame({
+        /*var modal = mw.tools.modal.frame({
             url: url,
             name: "mw_rte_image",
             width: 430,
@@ -1864,7 +1867,16 @@ mw.wysiwyg = {
             template: 'mw_modal_basic',
             overlay: true
         });
-        modal.overlay.style.backgroundColor = 'white';
+        modal.overlay.style.backgroundColor = 'white';*/
+        var modal = mw.dialogIframe({
+            url: url,
+            name: "mw_rte_image",
+            width: 460,
+            height: 'auto',
+            autoHeight:true,
+            template: 'mw_modal_basic',
+            overlay: true
+        });
     },
     media: function (hash) {
         if (mw.settings.liveEdit && typeof mw.target.item === 'undefined') return false;
@@ -2707,10 +2719,11 @@ mw.linkTip = {
         if (root === null || !root) {
             return false;
         }
-        mw.$(root).on('mousedown', function (e) {
+        mw.$(root).on('click', function (e) {
             var node = mw.linkTip.find(e.target);
             if (!!node) {
                 mw.linkTip.tip(node);
+                e.preventDefault()
             }
             else {
                 mw.$('.mw-link-tip').hide();
@@ -2718,24 +2731,16 @@ mw.linkTip = {
         });
     },
     find: function (target) {
-        var module = mw.tools.firstMatchesOnNodeOrParent(target, ['.module']);
         if (mw.tools.hasClass(target, 'module')) {
             return;
         }
-        else if (mw.tools.hasParentsWithClass(target, 'module')) {
-            var po = mw.tools.parentsOrder(target, ['edit', 'module'])
-            if (po.edit === -1) return;
-            if (po.edit > po.module) return;
+        var a = mw.tools.firstMatchesOnNodeOrParent(target, ['a']);
+        if(!a) return;
+
+        if (!mw.tools.parentsOrCurrentOrderMatchOrOnlyFirst(a, ['edit', 'module'])) {
+            return;
         }
-        if (target.nodeName === 'A') {
-            return target;
-        }
-        else if (mw.tools.hasParentsWithTag(target, 'a')) {
-            return mw.tools.firstParentWithTag(target, 'a');
-        }
-        else {
-            return undefined;
-        }
+        return a;
     },
     tip: function (node) {
 

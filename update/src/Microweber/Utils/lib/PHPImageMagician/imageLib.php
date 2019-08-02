@@ -957,6 +957,7 @@ class imageLib
         }
     }
     ## --------------------------------------------------------
+
     /** Apply a PNG overlay */
     private function gd_apply_overlay($im, $type, $amount)
         #
@@ -1450,7 +1451,7 @@ class imageLib
                 return array();
             }
         };
-        $exifData = exif_read_data($this->fileName, 'IFD0');
+        $exifData = @exif_read_data($this->fileName, 'IFD0');
         // *** Format the apperture value
         $ev = isset($exifData['ApertureValue']) ? $exifData['ApertureValue'] : '';
         $apPeicesArray = explode('/', $ev);
@@ -2070,8 +2071,8 @@ class imageLib
         }
         if (!$img) {
             // *** Get extension
-            $extension = strrchr($file, '.');
-            $extension = fix_strtolower($extension);
+            $extension = get_file_extension($file);
+            $extension = strtolower($extension);
             switch ($extension) {
                 case '.bmp':
                     $img = @$this->imagecreatefrombmp($file);
@@ -2318,19 +2319,33 @@ class imageLib
     {
         $file = $this->fileName;
         $isImage = false;
-        $finfo = finfo_open(FILEINFO_MIME_TYPE);
-        $mimeType = finfo_file($finfo, $file);
-        finfo_close($finfo);
-        switch ($mimeType) {
-            case 'image/jpeg':
-            case 'image/gif':
-            case 'image/png':
-            case 'image/bmp':
-            case 'image/x-windows-bmp':
+
+
+        if (function_exists('finfo_open')) {
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $mimeType = finfo_file($finfo, $file);
+            finfo_close($finfo);
+            switch ($mimeType) {
+                case 'image/jpeg':
+                case 'image/gif':
+                case 'image/png':
+                case 'image/bmp':
+                case 'image/x-windows-bmp':
+                    $isImage = true;
+                    break;
+                default:
+                    $isImage = false;
+            }
+        } elseif (function_exists('getimagesize')) {
+            // open with GD
+            if (@is_array(getimagesize($file))) {
                 $isImage = true;
-                break;
-            default:
-                $isImage = false;
+            }
+        } elseif (function_exists('exif_imagetype')) {
+            // open with EXIF
+            if (false !== exif_imagetype($file)) {
+                $isImage = true;
+            }
         }
         return $isImage;
     }

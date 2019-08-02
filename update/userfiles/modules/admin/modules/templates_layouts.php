@@ -47,6 +47,28 @@ if (isset($params['data-search'])) {
     $search_bar = $params['data-search'];
 }
 
+$small_view = false;
+if (isset($params['data-small-view'])) {
+    $small_view = $params['data-small-view'];
+}
+
+
+$skin_change_mode = false;
+if (isset($params['data-skin-change-mode'])) {
+    $skin_change_mode = $params['data-skin-change-mode'];
+}
+
+$hide_skin_settings = false;
+if (isset($params['data-hide-skin-settings'])) {
+    $hide_skin_settings = $params['data-hide-skin-settings'];
+}
+
+$show_skin_setting_in_first_tab = false;
+if (isset($params['data-show-skin-settings-on-first-tab'])) {
+    $show_skin_setting_in_first_tab = $params['data-show-skin-settings-on-first-tab'];
+    $hide_skin_settings = true;
+}
+
 
 $cur_template = get_option('data-template', $params['parent-module-id']);
 
@@ -70,7 +92,7 @@ if ($screenshots) {
             if (!isset($temp['screenshot'])) {
                 $temp['screenshot'] = '';
             }
-            $current_template = array('name' => $temp['name'], 'screenshot' => $temp['screenshot']);
+            $current_template = array('name' => $temp['name'], 'screenshot' => $temp['screenshot'], 'layout_file' => $temp['layout_file']);
         }
     }
 }
@@ -79,7 +101,12 @@ if ($screenshots) {
 
 <script type="text/javascript">
     $(document).ready(function () {
+
+
         mw.options.form('.mw-mod-template-settings-holder', function () {
+
+            var selected_skin =  $('#mw-module-skin-select-dropdown :selected').val();
+
             if (mw.notification != undefined) {
                 mw.notification.success('<?php _e("Module template is changed"); ?>');
             }
@@ -89,6 +116,12 @@ if ($screenshots) {
                 mw_admin_layouts_list_inner_modules_btns();
             }, 999);
             <?php endif; ?>
+
+
+            if(selected_skin){
+                $('#mw-module-skin-settings-module').attr('parent-template', selected_skin).reload_module();
+            }
+
         });
     });
 </script>
@@ -128,12 +161,27 @@ if ($screenshots) {
     }
 </script>
 
+<?php if(!$skin_change_mode): ?>
+
+
+
+
+
+<?php endif; ?>
+
+
+
+
 
 <?php if (is_array($templates)): ?>
     <?php $default_item_names = array(); ?>
 
 
     <div class="mw-modules-tabs">
+
+
+
+
 
         <div class="mw-accordion-item">
             <div class="mw-ui-box-header mw-accordion-title">
@@ -142,12 +190,16 @@ if ($screenshots) {
                 </div>
             </div>
             <div class="mw-accordion-content mw-ui-box mw-ui-box-content">
+
+
+
+
                 <!-- Settings Content -->
                 <div class="module-live-edit-settings module-layouts-settings">
 
 
                     <div class="mw-mod-template-settings-holder">
-                        <select data-also-reload="#mw-module-skin-settings-module" name="data-template"
+                        <select id="mw-module-skin-select-dropdown" data-also-reload="#mw-module-skin-settings-module" name="data-template"
                                 class="mw-ui-field mw_option_field  w100 hidden"
                                 option_group="<?php print $params['parent-module-id'] ?>"
                                 data-refresh="<?php print $params['parent-module-id'] ?>">
@@ -215,10 +267,10 @@ if ($screenshots) {
                             <!-- Current template - Start -->
                             <div class="mw-ui-row">
                                 <div class="mw-ui-col current-template" style="width: 100%;">
-                                    <label class="mw-ui-label"><?php print _e('Current layout'); ?></label>
+                                    <label class="mw-ui-label" title="<?php print $current_template['layout_file']; ?>"><?php print _e('Current layout'); ?></label>
                                     <div class="screenshot">
                                         <div class="holder">
-                                            <img src="<?php echo $current_template['screenshot']; ?>"
+                                            <img src="<?php echo thumbnail($current_template['screenshot'], 300); ?>"
                                                  alt="<?php print $current_template['name']; ?>" style="max-width:100%;"
                                                  title="<?php print $current_template['name']; ?>"/>
                                             <div class="title"><?php print $current_template['name']; ?></div>
@@ -234,6 +286,26 @@ if ($screenshots) {
                                 </div>
                             </div>
                         <?php endif; ?>
+
+
+
+
+
+                        <?php if ($show_skin_setting_in_first_tab): ?>
+
+                            <module type="admin/modules/templates_settings" id="mw-module-skin-settings-module"
+                                    parent-module-id="<?php print $params['parent-module-id'] ?>" parent-module="layouts"
+                                    parent-template="<?php print $cur_template ?>"/>
+
+                        <?php endif; ?>
+
+
+
+
+
+
+
+
                         <!-- Current template - End -->
                     </div>
 
@@ -241,6 +313,19 @@ if ($screenshots) {
                 <!-- Settings Content - End -->
             </div>
         </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         <div class="mw-accordion-item">
             <div class="mw-ui-box-header mw-accordion-title">
@@ -374,9 +459,19 @@ if ($screenshots) {
                 </div>
 
 
+
+
+
+                <?php if (!$hide_skin_settings): ?>
                 <module type="admin/modules/templates_settings" id="mw-module-skin-settings-module"
                         parent-module-id="<?php print $params['parent-module-id'] ?>" parent-module="layouts"
                         parent-template="<?php print $cur_template ?>"/>
+
+                <?php endif; ?>
+
+
+
+
             </div>
         </div>
     </div>

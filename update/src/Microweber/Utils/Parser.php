@@ -8,6 +8,7 @@ $parser_cache_object = false; //global cache storage
 $mw_replaced_edit_fields_vals = array();
 $mw_replaced_edit_fields_vals_inner = array();
 $mw_replaced_codes_tag = array();
+
 $mw_replaced_textarea_tag = array();
 $local_mw_replaced_modules_ids_grouped = array();
 $local_mw_replaced_modules = array();
@@ -50,6 +51,8 @@ class Parser
     private $iter_parent = array();
     private $_mw_edit_field_map = array();
     private $_additional_parsers = array();
+    public $current_module_params = false;
+    public $current_module = false;
 
     public function __construct($app = null)
     {
@@ -643,14 +646,6 @@ class Parser
 
                                         // if (isset($this->_existing_module_ids[$mod_id])) {
 
-//                                        if(isset($this->_existing_module_ids_map[$parse_key.$replace_key])){
-//                                            $mod_id = $this->_existing_module_ids_map[$parse_key.$replace_key];
-//                                            dd($parse_key);
-//                                            dd($value);
-//                                            dd($key);
-//                                            dd($parse_item);
-//                                            dd($mod_id);
-//                                        }
 
 
                                         if (isset($local_mw_replaced_modules_ids_grouped[$par_id_mod_count]) and $local_mw_replaced_modules_ids_grouped[$par_id_mod_count][$module_name]) {
@@ -664,8 +659,6 @@ class Parser
                                             //    if ( !$skip) {
                                             ++$it_loop;
                                             $inc_mod_num = 0;
-
-                                            // dd($this->_current_parser_rel,$this->_current_parser_field);
 
 
                                             if (isset($this->_current_parser_module_of_type[$par_id_mod_count])) {
@@ -731,11 +724,7 @@ class Parser
                                                         } else {
 
                                                         }
-                                                        //dd($mod_id_probe,$inc_mod_num,$this->_current_parser_module_of_type[$par_id_mod_count]);
-                                                        //  $mod_id = $mod_id . '-random-fixme-id-' . uniqid();
-                                                        // dd($local_mw_replaced_modules_ids_grouped);
-                                                        // $mod_id = $mod_id . '-random-fixme-id-1' ;
-                                                        // dd($mod_id);
+
 
                                                     }
 
@@ -765,10 +754,7 @@ class Parser
 
                                         $module_html = str_replace('__MODULE_ID__', "id='{$attrs['id']}'", $module_html);
 
-                                        if (strstr($mod_id, 'module-layouts-64--3-pictures--1')) {
-                                            // dd('444444'.$module_html,$this->_current_parser_module_of_type);
 
-                                        }
 
                                     } else {
                                         $module_html = str_replace('__MODULE_ID__', '', $module_html);
@@ -1020,7 +1006,6 @@ class Parser
                 if ($value != '') {
                     $layout = str_replace($key, $value, $layout);
                 }
-                // unset($mw_replaced_codes_tag[$key]);
             }
         }
 
@@ -1109,6 +1094,16 @@ class Parser
 //                }
 //            }
         // }
+
+        if (!empty($mw_replaced_codes_tag)) {
+            foreach ($mw_replaced_codes_tag as $key => $value) {
+                if ($value != '') {
+                    $layout = str_replace($key, $value, $layout);
+                }
+            }
+        }
+
+
         if (!$coming_from_parent) {
             $layout = $this->replace_url_placeholders($layout);
         }
@@ -2717,6 +2712,7 @@ $srsc_str
         global $mw_replaced_edit_fields_vals;
         global $other_html_tag_replace_inc;
         global $mw_replaced_codes_tag;
+
         global $mw_replaced_textarea_tag;
 
 
@@ -2731,6 +2727,7 @@ $srsc_str
                     $mod_content = str_replace($value, $v1, $mod_content);
                     if (!isset($replaced_scripts[$v1])) {
                         $mw_replaced_codes_tag[$v1] = $value;
+
                     }
                 }
             }

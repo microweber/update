@@ -118,10 +118,6 @@ body.mw-live-edit .plain-text {
     background-color: rgba(221, 221, 221, 1);
 }
 
-ol:not([class]),
-ul:not([class]) {
-    padding-left: 20px;
-}
 
 /****************************
            Plus
@@ -1605,8 +1601,14 @@ body.has-opened-sidebar #live_edit_toolbar {
 .module-modal-settings-menu-holder {
     position: absolute;
     right: 40px;
-    top: 0px;
-    min-height: 30px;
+    top: 50%;
+    opacity: 1;
+    transition: opacity .3s;
+    transform: translateY(-50%);
+}
+
+.module-modal-settings-menu-holder:hover{
+    opacity: 1;
 }
 
 .module-modal-settings-menu-holder a {
@@ -3135,10 +3137,6 @@ div[id*='SSDIVEL'] {
     background-color: #111111;
 }
 
-.mw-add-content-modal {
-    max-width: 95%;
-    min-width: 320px;
-}
 
 .mwInaccessibleModulesMenu {
     position: absolute;
@@ -3973,34 +3971,20 @@ body.dragStart .allow-drop {
 }
 
 .mw-module-presets-opener {
-    float: right;
     display: block;
     transition: color .3s;
     cursor: pointer;
-}
-
-.mw-module-presets-opener {
     color: #bababa;
 }
 
-.mw-module-presets-opener:before {
-    /*  content: '\002d';
-      font-family: 'admin';
-      position: relative;
-      top: 1px;*/
-}
 
 .mw-module-presets-opener:after {
-    content: "\0118";
+    /*content: "\0118";*/
     font-family: Microweber !important;
     margin-left: 5px;
     font-size: 20px;
     position: relative;
     top: 0;
-}
-
-.mw-module-presets-opener:hover {
-    color: rgba(14, 128, 229, 1);
 }
 
 .mw-module-presets-content {
@@ -4410,6 +4394,9 @@ body.dragStart .allow-drop {
     z-index: 1101;
     display: inline-block;
 }
+.mw-handle-item.active{
+    z-index: 1102;
+}
 
 body.dragStart .mw-columns-resizer,
 body.dragStart .mw-handle-item {
@@ -4473,6 +4460,7 @@ body.dragStart .mw-handle-item.ui-draggable-dragging {
     /*transform-origin: top center;*/
     /*transition: all 70ms;*/
     margin-top: 10px;
+    min-width: 100%;
 }
 
 .mw-handle-menu-default.mw-handle-menu:after {
@@ -4982,5 +4970,10 @@ html.padding-control-start .mw-handle-item {
 
 .mw-padding-control-active-mark.active {
     display: block;
+}
+
+.mw-module-dialog-icon{
+    width: 25px;
+    margin:0 7px 0 0;
 }
 

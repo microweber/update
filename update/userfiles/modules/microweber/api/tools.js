@@ -8,6 +8,20 @@ mw.requestAnimationFrame = (function () {
         };
 })();
 
+mw._intervals = {};
+mw.interval = function(key, func){
+    if(!key || !func || !!mw._intervals[key]) return;
+    mw._intervals[key] = func;
+};
+mw.removeInterval = function(key){
+    delete mw._intervals[key];
+};
+setInterval(function(){
+    for(var i in mw._intervals){
+        mw._intervals[i].call();
+    }
+}, 99);
+
 mw.require("files.js");
 mw.require("css_parser.js");
 mw.require("components.js");
@@ -126,6 +140,22 @@ if (!window.escape) {
     };
 }
 mw.tools = {
+    createAutoHeight: function() {
+        if(window.thismodal && thismodal.iframe) {
+            mw.tools.iframeAutoHeight(thismodal.iframe, 'now');
+        }
+        else if(window.top.frameElement && window.top.frameElement.contentWindow === window) {
+            mw.tools.iframeAutoHeight(window.top.frameElement, 'now');
+        } else if(window.top !== window) {
+            top.mw.$('iframe').each(function(){
+                try{
+                    if(this.contentWindow === window) {
+                        mw.tools.iframeAutoHeight(this, 'now');
+                    }
+                } catch(e){}
+            })
+        }
+    },
     collision: function(el1, el2){
         if(!el1 || !el2) return;
         el1 = $(el1), el2 = $(el2);
@@ -137,40 +167,70 @@ mw.tools = {
         o2.height = el2.height();
         return (o1.left < o2.left + o2.width  && o1.left + o1.width  > o2.left &&  o1.top < o2.top + o2.height && o1.top + o1.height > o2.top);
     },
-    iframeAutoHeight:function(frame){
+    iframeAutoHeight:function(frame, mode){
+        mode = mode || 'onload';
         frame = mw.$(frame)[0];
         if(!frame) return;
-        var _detector =  document.createElement('div');
+
+
+
+
+
+
+
 
         frame.scrolling="no";
         frame.style.minHeight = 0 + 'px';
-        frame.style.height = 0 + 'px';
-        frame.style.height = frame.contentWindow.document.body.scrollHeight + 'px';
         $(frame).on('load resize', function(){
-            setTimeout(function(){
-                frame.contentWindow.document.body.appendChild(_detector);
-            }, 100);
-            frame.style.height = 0 + 'px';
-            $('#settings-container,#settings-main', frame.contentWindow.document.body).css({
-                'minHeight': '0px'
-            });
-            frame._currHeight = frame.contentWindow.document.body.scrollHeight
-            frame.style.height = frame._currHeight + 'px';
 
+
+            if(!mw.tools.canAccessIFrame(frame)) {
+                console.log('Iframe can not be accessed.', frame);
+                return;
+            }
+            if(!frame.contentWindow.document.body){
+                return;
+            }
+            if(!!frame.contentWindow.document.querySelector('.mw-iframe-auto-height-detector')){
+                return;
+            }
+
+            var _detector = document.createElement('div');
+            _detector.className = 'mw-iframe-auto-height-detector';
+            _detector.id = mw.id();
+
+            var insertDetector = function() {
+                if(!frame.contentWindow.document.querySelector('.mw-iframe-auto-height-detector')){
+                    frame.contentWindow.document.body.appendChild(_detector);
+                }
+            };
+
+            if(mode === 'now'){
+                setTimeout(function(){
+                    insertDetector();
+                }, 100);
+            }
+
+
+
+            if(mode === 'onload'){
+                setTimeout(function(){
+                    insertDetector();
+                }, 100);
+            }
             frame._int = setInterval(function(){
-                if(frame.parentNode){
-                    var offTop = $(_detector).offset().top;
-                    if(offTop !== frame._currHeight){
+                if(frame.parentNode && frame.contentWindow && frame.contentWindow.$){
+                    var offTop = frame.contentWindow.$(_detector).offset().top;
+                    if(offTop && offTop !== frame._currHeight){
                         frame._currHeight = offTop;
                         frame.style.height = offTop + 'px';
-                        $(frame).trigger('bodyResize')
+                        $(frame).trigger('bodyResize');
                     }
-
                 }
                 else {
                     clearInterval(frame._int);
                 }
-            }, 333);
+            }, 77);
 
 
         });
@@ -275,16 +335,16 @@ mw.tools = {
         var can = false;
         try {
             var doc = iframe.contentDocument || iframe.contentWindow.document;
-            can = !!doc.body;
+            can = !!doc.body && !!doc.documentElement;
         } catch (err) {
         }
         return can;
     },
     createStyle: function (c, css, ins) {
-        var ins = ins || mwd.getElementsByTagName('head')[0];
+        ins = ins || mwd.getElementsByTagName('head')[0];
         var style = mw.$(c)[0];
-        if (typeof style === 'undefined') {
-            var style = mwd.createElement('style');
+        if (!style) {
+            style = mwd.createElement('style');
             ins.appendChild(style);
         }
         style.innerHTML = css;
@@ -793,7 +853,7 @@ mw.tools = {
                 onopen.call(window, modal_return)
             }
             var max = 0;
-            $(".mw_modal").each(function () {
+            $(".mw_modal, .mw-dialog").each(function () {
                 var z = parseInt($(this).css('zIndex'), 10);
                 if (!isNaN(z)) {
                     max = z > max ? z : max;
@@ -816,7 +876,13 @@ mw.tools = {
             var el = mw.$(selector),
                 child_cont = el.find(".mw_modal_container:first"),
                 parent_cont = el.parents(".mw_modal_container:first");
-            if (child_cont.length !== 0) {
+            if(!el[0]){
+                return false;
+            }
+            else if(el[0]._dialog){
+                return el[0]._dialog;
+            }
+            else if (child_cont.length !== 0) {
                 return child_cont.parent()[0].modal;
             }
             else if (parent_cont.length !== 0) {
@@ -1422,14 +1488,17 @@ mw.tools = {
         if (typeof mw.tools.dropdownActivated === 'undefined') {
             mw.tools.dropdownActivated = true;
             $(mwd.body).mousedown(function (e) {
-                if ($(e.target).hasClass('mw-dropdown-content')
-                    || $(e.target).hasClass('mw-dropdown')
-                    || mw.tools.hasParentsWithClass(e.target, 'mw-dropdown')
-                ) {
-                    // dont hide the dropdown
-                } else if (mw.$('.mw-dropdown.hover').length == 0) {
+                if (!mw.tools.hasAnyOfClassesOnNodeOrParent(e.target, ['mw-dropdown-content', 'mw-dropdown'])) {
                     mw.$(".mw-dropdown").removeClass("active");
                     mw.$(".mw-dropdown-content").hide();
+                    if(self !== top) {
+                        try {
+                            top.mw.$(".mw-dropdown").removeClass("active");
+                            top.mw.$(".mw-dropdown-content").hide();
+                        } catch(e){
+
+                        }
+                    }
                 }
             });
         }
@@ -3632,6 +3701,33 @@ mw.tools = {
     confirm_reset_module_by_id: function (module_id) {
         var r = confirm("Are you sure you want to reset this module?");
         if (r == true) {
+
+
+
+
+            var is_a_preset = $('#'+module_id).attr('data-module-original-id');
+            var is_a_preset_attrs = $('#'+module_id).attr('data-module-original-attrs');
+            if(is_a_preset){
+                var orig_attrs_decoded = JSON.parse(window.atob(is_a_preset_attrs));
+                if (orig_attrs_decoded) {
+                    $('#'+module_id).removeAttr('data-module-original-id');
+                    $('#'+module_id).removeAttr('data-module-original-attrs');
+                    $('#'+module_id).attr(orig_attrs_decoded).reload_module();
+
+                    if(  window.top.module_settings_modal_reference_preset_editor_thismodal ){
+                        window.top.module_settings_modal_reference_preset_editor_thismodal.remove();
+                    }
+
+
+
+                 }
+                 return;
+            }
+
+
+
+
+
             var data = {};
             data.modules_ids = [module_id];
 
@@ -3664,6 +3760,8 @@ mw.tools = {
            }
 
 
+           //data-module-original-attrs
+
             $.ajax({
                 type: "POST",
                 // dataType: "json",
@@ -3683,6 +3781,9 @@ mw.tools = {
 
                  },
             });
+
+
+
 
 
 
@@ -3739,7 +3840,8 @@ mw.tools = {
         var defaultOpts = {
             url: src,
             // width: 500,
-            height: '90vh',
+            height: 'auto',
+            autoHeight: true,
             name: 'mw-module-settings-editor-front',
             title: 'Settings',
             template: 'default',
@@ -3750,7 +3852,8 @@ mw.tools = {
 
         var settings = $.extend({}, defaultOpts, modalOptions);
 
-        return mw.tools.modal.frame(settings);
+        // return mw.tools.modal.frame(settings);
+        return mw.dialogIframe(settings);
     },
     open_module_modal: function (module_type, params, modalOptions) {
 
@@ -5500,15 +5603,17 @@ mw.fileWindow = function (config) {
     var url = config.types ? ("rte_image_editor?types=" + config.types + '#fileWindow') : ("rte_image_editor#fileWindow");
     var url = mw.settings.site_url + 'editor_tools/' + url;
     var root = window.top.mw ? window.top.mw : mw;
-    var modal = root.tools.modal.frame({
+    //var modal = root.tools.modal.frame({
+    var modal = root.dialogIframe({
         url: url,
         name: "mw_rte_image",
         width: 430,
-        height: 230,
+        height: 'auto',
+        autoHeight: true,
         //template: 'mw_modal_basic',
         overlay: true
     });
-    var frameWindow = $('iframe', modal.container)[0].contentWindow;
+    var frameWindow = $('iframe', modal.main)[0].contentWindow;
     frameWindow.onload = function () {
         frameWindow.$('body').on('change', function (e, url, m) {
             if (config.change) {
@@ -5516,8 +5621,7 @@ mw.fileWindow = function (config) {
                 modal.remove()
             }
         });
-    }
-    modal.overlay.style.backgroundColor = 'white';
+    };
 };
 /***********************************************
  mw.modal({
@@ -5533,6 +5637,7 @@ mw.fileWindow = function (config) {
  The function returns Object
  ************************************************/
 mw.modal = function (o) {
+    // return new mw.Dialog(o);
     var modal = mw.tools.modal.init(o);
     if (!!modal && (typeof(modal.main) != "undefined")) {
         if (modal.main.constructor === $.fn.constructor) {
@@ -5651,7 +5756,7 @@ mw._colorPicker = function (options) {
         mw.$('.mw-tooltip-content', tip).empty();
         sett.attachTo = mw.$('.mw-tooltip-content', tip)[0]
 
-        var frame = AColorPicker.createPicker(sett);
+        frame = AColorPicker.createPicker(sett);
 
         frame.onchange = function (data) {
 
@@ -5659,12 +5764,12 @@ mw._colorPicker = function (options) {
                 proto.settings.onchange(data.color);
             }
 
-            if ($el[0].nodeName == 'INPUT') {
+            if ($el[0].nodeName === 'INPUT') {
                 $el.val(data.color);
             }
-        }
+        };
 
-        if ($el[0].nodeName == 'INPUT') {
+        if ($el[0].nodeName === 'INPUT') {
             $el.on('focus', function (e) {
                 if(this.value){
                     frame.color = this.value;
@@ -5689,7 +5794,7 @@ mw._colorPicker = function (options) {
                 $(tip).hide();
             }
         });
-        if ($el[0].nodeName == 'INPUT') {
+        if ($el[0].nodeName === 'INPUT') {
             $el.bind('blur', function () {
                 //$(tip).hide();
             });
@@ -5715,13 +5820,13 @@ mw._colorPicker = function (options) {
         }
     }
 
-}
+};
 mw.colorPicker = mw.colourPicker = function (o) {
     return new mw._colorPicker(o);
-}
+};
 mw.accordion = function (el, callback) {
     return mw.tools.accordion(mw.$(el)[0], callback);
-}
+};
 $.fn.timeoutHover = function (ce, cl, time1, time2) {
     var time1 = time1 || 350;
     var time2 = time2 || time1;
@@ -5855,20 +5960,6 @@ String.prototype.hash = function () {
 }
 
 mw.ajax = function (options) {
-    /* if (!options._success) {
-     options._success = options.success;
-     delete options.success;
-     options.success = function (data, status, xhr) {
-     if (data.form_data_required) {
-     mw.extradataForm(options, data);
-     }
-     else {
-     if (typeof options._success === 'function') {
-     options._success.call(this, data, status, xhr);
-     }
-     }
-     };
-     }*/
     var xhr = $.ajax(options);
     return xhr;
 };

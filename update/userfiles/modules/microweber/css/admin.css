@@ -2949,7 +2949,7 @@ body.grabbing, body.grabbing * {
 }
 
 .module-live-edit-settings {
-    padding: 15px;
+    padding: 0px;
 }
 
 .mw-accordion .mw-accordion-content .module-live-edit-settings {
@@ -3199,6 +3199,21 @@ body.grabbing, body.grabbing * {
 .mw-custom-field-icon-property:before {
     font-family: 'Microweber';
     content: "\f14a";
+}
+
+.mw-custom-field-icon-breakline:before {
+    font-family: 'Microweber';
+    content: "\f2f4";
+}
+
+.mw-custom-field-icon-button:before {
+    font-family: 'Microweber';
+    content: "\f340";
+}
+
+.mw-custom-field-icon-captcha:before {
+    font-family: 'Microweber';
+    content: "l";
 }
 
 .mw-ui-btn > [class*="mw-custom-field-icon-"] {
@@ -7479,9 +7494,14 @@ select.silver-field {
 
 .mw-module-settings-box .upload-button-prop.mw-ui-box .mw-ui-btn {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    top: 0;
+    left: 0;
+    width:100%;
+    height: 100%;
+}
+.mw-module-settings-box .upload-button-prop.mw-ui-box .mw-ui-btn > span{
+    top:50%;
+    transform: translateY(-50%);
 }
 
 .mw-module-settings-box + .mw-module-settings-box {
@@ -7572,4 +7592,20 @@ select.silver-field {
 #mw-admin-main-menu::-webkit-scrollbar-thumb:hover,
 .fixed-side-column-container::-webkit-scrollbar-thumb:hover {
     background: #555;
+}
+
+#module-saved-presets:empty{
+    display: none;
+}
+
+#create-presets-btn{
+    float: right;
+}
+.mw-presets-list-holder{
+    padding-top: 10px;
+    clear: both;
+}
+
+.js-module-preset-item-form-holder > div:last-child{
+    text-align: right;
 }

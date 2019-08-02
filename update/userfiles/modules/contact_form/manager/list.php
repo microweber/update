@@ -32,6 +32,7 @@
 
     .js-limited.more {
         white-space: inherit;
+		word-wrap: break-word;
     }
 
     .js-toggle-full {
@@ -100,6 +101,12 @@ $data_paging = get_form_entires($data_paging);
 if ((url_param('current_page') != false)) {
     $data['current_page'] = url_param('current_page');
 }
+
+if ($data['limit'] == false) {
+	$data['limit'] = 10;
+}
+
+$limit_per_page = $data['limit'];
 
 $custom_fields = array();
 $data = get_form_entires($data);
@@ -188,7 +195,7 @@ if (is_array($data)) {
                                 //                                }
                                 ?>
 
-                                <?php if (mb_strlen($values_plain) > 50): ?>
+                                <?php if (mb_strlen($values_plain) > 70): ?>
                                     <div class="js-limited">
                                         <?php print $values_plain; ?>
                                         <br/>
@@ -236,8 +243,10 @@ if ($load_list == 1) {
   <?php endif; ?>
  </div>
 
-<?php if (is_array($data)) : ?>
-	 <div class="mw-ui-col text-center" style="width: 70%">
+<?php if (is_array($data) && !empty($data)) : ?>
+<?php if(count($data) > $limit_per_page): ?>   
+
+<div class="mw-ui-col text-center" style="width: 70%">
     <div class="mw-paging mw-paging- mw-paging- inline-block">
     <?php print paging("num=$data_paging"); ?> 
     </div>
@@ -245,17 +254,15 @@ if ($load_list == 1) {
     <?php endif; ?>
     <?php if (isset($params['export_to_excel'])) : ?>
     <?php endif; ?>
-    </div>
-<?php endif; ?>
+</div>
 
-<?php if (is_array($data)) : ?>
- <div class="mw-ui-col">
+<div class="mw-ui-col">
     <div class="mw-field" style="width:100%;" data-before="<?php _e('Show items per page'); ?>">
         <select onchange="if (this.value) window.location.href=this.value">
             <option value="">Select</option>
             <option value="?per_page=10">10</option>
              <option value="?per_page=50">50</option>
-            <option value="?per_page=100">100</option>
+            <option value="?per_page=100">100</option> 
             <option value="?per_page=200">200</option>
         </select>
     </div>
@@ -264,17 +271,13 @@ if ($load_list == 1) {
         <strong><?php print _e('Total'); ?>:</strong>
         <span><?php echo count($data); ?> messages in this list</span>
     </div>
-    
-    
-  </div>
+</div>
 <?php endif; ?>
-
+<?php endif; ?>
 
 </div>
 
 <?php
-
-
 /*<div id="start-email-campaign"> <a class="mw-ui-btn pull-right" href="javascript:;" onclick="Alert('<?php _e("Coming Soon"); ?>!');" >
   <?php _e("Start an Email Campaign"); ?>
   </a> <span class="pull-right" style="margin: 9px 20px 0 0;">

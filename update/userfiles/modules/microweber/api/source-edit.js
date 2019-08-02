@@ -41,20 +41,16 @@ mw.editSource = function (node) {
             if(!mw._editSource.ok.disabled){
                 $(mw._editSource.target).html(mw._editSource.area.value);
                 $(mw._editSource.wrapper).removeClass('active');
+                mw.wysiwyg.change(mw._editSource.target);
             }
         });
     }
     mw._editSource.area.value = node.innerHTML;
     mw._editSource.target = node;
     var $node = $(node), off = $node.offset();
-    // $(mw._editSource.area)
-    //     .height($node.outerHeight())
-    //     .width($node.outerWidth())
-    //     .css('max-width', '80%')
-
     $(mw._editSource.area)
-        .height(250)
-        .width(600)
+        .height($node.outerHeight())
+        .width($node.outerWidth())
 
     $(mw._editSource.wrapper)
         .css(off)

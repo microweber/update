@@ -1,16 +1,43 @@
 <?php
 
+event_bind(
+    'mw.admin.sidebar.li.first', function ($item) {
+
+    $update_channel = Config::get('microweber.update_channel');
+    if ('disabled' == $update_channel) {
+        return;
+    }
+
+    if (mw()->ui->disable_marketplace != true) {
+        $cache_id = 'mw_update_check_auto_update_check_core';
+        $cache_group = 'update';
+        $last_check = cache_get($cache_id, $cache_group, 3600);
+
+        if ($last_check and !empty($last_check) and isset($last_check['microweber/update'])) {
+            if(!defined('MW_UPDATE_NOTIFICATION_BTN_DISPLAYED_IN_SIDEBAR')){
+                define('MW_UPDATE_NOTIFICATION_BTN_DISPLAYED_IN_SIDEBAR', 1);
+            }
+            print '<div type="updates/admin_sidebar_btn" no_wrap="true" class="mw-lazy-load-module"></div>';
+        }
+
+    }
+}
+);
+
 
 event_bind(
     'mw.admin.sidebar.li.last', function ($item) {
     if (mw()->ui->disable_marketplace != true) {
 
+        if(defined('MW_UPDATE_NOTIFICATION_BTN_DISPLAYED_IN_SIDEBAR')){
+            return;
+        }
         $cache_id = 'mw_update_check_auto_update_check_core';
         $cache_group = 'update';
 
         $last_check = cache_get($cache_id, $cache_group, 3600);
 
-         if ($last_check == 'noupdate') {
+        if ($last_check == 'noupdate') {
             return;
         }
 
@@ -48,7 +75,6 @@ function __mw_check_core_system_update()
         $last_check = mw()->update->composer_search_packages($search_params);
 
 
-
         if (!$last_check) {
             $last_check = 'noupdate';
         } else {
@@ -61,7 +87,7 @@ function __mw_check_core_system_update()
                 $notif['rel_id'] = 'updates_core';
                 $notif['title'] = 'New system update is available';
                 $notif['description'] = "There is new system update available";
-               // $notif['notification_data'] = @json_encode($last_check);
+                // $notif['notification_data'] = @json_encode($last_check);
 
                 mw()->app->notifications_manager->save($notif);
             }
@@ -94,9 +120,19 @@ function mw_print_admin_updates_settings_link()
     if ($active == 'comments') {
         $cls = ' class="active" ';
     }
-    $notif_html = '';
+
+//       $update_check_count = mw()->app->notifications_manager->get('rel_type=update_check&is_read=0&count=1');
+//    $notif_html = '';
+//    if($update_check_count){
+//        $notif_html = '<sup class="mw-notification-count">'.$update_check_count.'</sup>';
+//
+//    }
+
+    //$check = __mw_check_core_system_update();
+
     $mname = module_name_encode('updates');
-    print "<li><a class=\"item-" . $mname . "\" href=\"#option_group=" . $mname . "\"><span class=\"mai-thunder\"></span><strong>" . _e("Updates", true) . "</strong></a></li>";
+    $modurl =admin_url().'view:settings#option_group='. module_name_encode('updates');
+    print "<li><a class=\"item-" . $mname . "\" href=\"" . $modurl . "\"><span class=\"mai-thunder\"></span><strong>" . _e("Updates", true) . "</strong></a></li>";
 
     //$notif_count = mw()->notifications_manager->get('module=comments&is_read=0&count=1');
     /*if ($notif_count > 0) {
