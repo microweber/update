@@ -317,7 +317,6 @@
             <div class="tab page-layout-tab">
                 <label class="mw-ui-label"><?php _e('Link text'); ?></label>
                 <div class="mw-field">
-
                     <input type="text" id="ltext">
                 </div>
                 <ul class="mw-ui-box mw-ui-box-content mw-ui-navigation" id="layouts-selector">
