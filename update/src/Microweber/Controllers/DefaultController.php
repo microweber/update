@@ -948,8 +948,23 @@ class DefaultController extends Controller
 
             unset($data['ondrop']);
         }
+      //  d($data);
+     //   d($mod_n);
+        if ($mod_n == 'element-from-template' && isset($data['template'])) {
+            $t = str_replace('..', '', $data['template']);
+            $possible_layout = TEMPLATE_DIR . $t;
+            $possible_layout = normalize_path($possible_layout, false);
 
-        if ($mod_n == 'layout' && isset($data['template'])) {
+            if (is_file($possible_layout)) {
+                $l = new \Microweber\View($possible_layout);
+                $layout = $l->__toString();
+                $layout = $this->app->parser->process($layout, $options = false);
+                return response($layout);
+
+
+            }
+        }
+        if ($mod_n == 'module-' && isset($data['template'])) {
             $t = str_replace('..', '', $data['template']);
             $possible_layout = templates_path() . $t;
             $possible_layout = normalize_path($possible_layout, false);
@@ -1147,6 +1162,13 @@ class DefaultController extends Controller
 
         $is_no_editmode = $this->app->url_manager->param('no_editmode');
         $is_quick_edit = $this->app->url_manager->param('mw_quick_edit');
+        $back_to_editmode = $this->app->user_manager->session_get('back_to_editmode');
+        if(!$back_to_editmode){
+            if(isset($_COOKIE['mw-back-to-live-edit']) and $is_admin){
+                $back_to_editmode = $_COOKIE['mw-back-to-live-edit'];
+            }
+        }
+
 
         if ($is_quick_edit != false) {
             $page_url = $this->app->url_manager->param_unset('mw_quick_edit', $page_url);
@@ -1300,16 +1322,17 @@ class DefaultController extends Controller
 
             if ($is_editmode == false
                 and !$is_preview_template
+                and !$is_no_editmode
                 and !$is_preview_module
                 and $this->isolate_by_html_id == false
                 and !isset($_REQUEST['isolate_content_field'])
+                and !isset($_REQUEST['content_id'])
                 and !isset($_REQUEST['embed_id'])
                 and !is_cli()
                 and !defined('MW_API_CALL')
                 and !defined('MW_NO_SESSION')
             ) {
 
-                $back_to_editmode = $this->app->user_manager->session_get('back_to_editmode');
 
                 if (!$back_to_editmode and !$is_editmode and empty($_GET)) {
                     if ($enable_full_page_cache) {
@@ -1335,6 +1358,7 @@ class DefaultController extends Controller
             $output_cache_id = __FUNCTION__ . crc32($_SERVER['REQUEST_URI']);
             $output_cache_group = 'global/full_page_cache';
             $output_cache_content = $this->app->cache_manager->get($output_cache_id, $output_cache_group, $output_cache_timeout);
+
             if ($output_cache_content != false) {
                 echo $output_cache_content;
 
@@ -2009,14 +2033,6 @@ class DefaultController extends Controller
                 }
             } elseif ($is_editmode == false and $is_admin == true and mw()->user_manager->session_id() and !(mw()->user_manager->session_all() == false)) {
                 if (!isset($_REQUEST['isolate_content_field']) and !isset($_REQUEST['content_id'])) {
-                    $back_to_editmode = $this->app->user_manager->session_get('back_to_editmode');
-
-                    if(!$back_to_editmode){
-                        if(isset($_COOKIE['mw-back-to-live-edit']) and $is_admin){
-                            $back_to_editmode = $_COOKIE['mw-back-to-live-edit'];
-                        }
-                    }
-
 
                     if ($back_to_editmode == true) {
                         $tb = mw_includes_path() . DS . 'toolbar' . DS . 'toolbar_back.php';
@@ -2202,171 +2218,23 @@ class DefaultController extends Controller
         }
     }
 
+
+    /**
+     * @deprecated 1.1.12 Moved to JsCompileController
+     */
+
     public function apijs_settings()
     {
-        if (!defined('MW_NO_SESSION')) {
-            define('MW_NO_SESSION', 1);
-        }
-        $lastModified = time() - 120;
-        $etagFile = md5(serialize($_REQUEST));
-        $ifModifiedSince = (isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) ? $_SERVER['HTTP_IF_MODIFIED_SINCE'] : false);
-
-        //get the HTTP_IF_NONE_MATCH header if set (etag: unique file hash)
-        $etagHeader = (isset($_SERVER['HTTP_IF_NONE_MATCH']) ? trim($_SERVER['HTTP_IF_NONE_MATCH']) : false);
-
-        //set last-modified header
-        // header("Last-Modified: " . gmdate("D, d M Y H:i:s", $lastModified) . " GMT");
-        // header('Cache-Control: public');
-        // header("Etag: $etagFile");
-
-        if (@strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) == $lastModified || $etagHeader == $etagFile) {
-            // header("HTTP/1.1 304 Not Modified");
-            // return;
-            // exit;
-        }
-
-        $ref_page = false;
-
-        if (isset($_REQUEST['id'])) {
-            $ref_page = $this->app->content_manager->get_by_id($_REQUEST['id']);
-        } elseif (isset($_SERVER['HTTP_REFERER'])) {
-            $ref_page = $_SERVER['HTTP_REFERER'];
-            if ($ref_page != '') {
-                $ref_page = $this->app->content_manager->get_by_url($ref_page);
-                $page_id = $ref_page['id'];
-            }
-        }
-
-        $cat_url = false;
-        if (isset($_REQUEST['category_id'])) {
-            $cat_url = intval($_REQUEST['category_id']);
-        } elseif (isset($_SERVER['HTTP_REFERER'])) {
-            $cat_url = mw()->category_manager->get_category_id_from_url($_SERVER['HTTP_REFERER']);
-            $cat_url = intval($cat_url);
-        }
-
-        if ($cat_url != false) {
-            if (!defined('CATEGORY_ID')) {
-                define('CATEGORY_ID', intval($cat_url));
-            }
-        }
-
-        // header("Content-type: text/javascript");
-
-        $file = mw_includes_path() . 'api' . DS . 'api_settings.js';
-
-        $this->app->content_manager->define_constants($ref_page);
-        $l = new \Microweber\View($file);
-
-        $l = $l->__toString();
-
-        $compile_assets = \Config::get('microweber.compile_assets');
-        if ($compile_assets and defined('MW_VERSION')) {
-            $userfiles_dir = userfiles_path();
-            $userfiles_cache_dir = normalize_path($userfiles_dir . 'cache' . DS . 'apijs');
-            $userfiles_cache_filename = $userfiles_cache_dir . 'api_settings.' . md5(site_url() . template_dir()) . '.' . MW_VERSION . '.js';
-            if (!is_file($userfiles_cache_filename)) {
-                if (!is_dir($userfiles_cache_dir)) {
-                    mkdir_recursive($userfiles_cache_dir);
-                }
-                if (is_dir($userfiles_cache_dir)) {
-                    @file_put_contents($userfiles_cache_filename, $l);
-                }
-            } else {
-                $fmd5 = md5_file($userfiles_cache_filename);
-                $fmd = md5($l);
-                if ($fmd5 != $fmd) {
-                    @file_put_contents($userfiles_cache_filename, $l);
-                }
-            }
-        }
-
-        $response = \Response::make($l);
-
-        $response->header('Content-Type', 'application/javascript');
-
-        return $response;
-
-        // return;
+        return (new JsCompileController())->apijs_settings();
     }
 
+
+    /**
+     * @deprecated 1.1.12 Moved to JsCompileController
+     */
     public function apijs()
     {
-        if (!defined('MW_NO_SESSION')) {
-            define('MW_NO_SESSION', 1);
-        }
-
-        $ref_page = false;
-        if (isset($_REQUEST['id'])) {
-            $ref_page = $this->app->content_manager->get_by_id($_REQUEST['id']);
-        } elseif (isset($_SERVER['HTTP_REFERER'])) {
-            $ref_page = $_SERVER['HTTP_REFERER'];
-            if ($ref_page != '') {
-                $ref_page = $this->app->content_manager->get_by_url($ref_page);
-                $page_id = $ref_page['id'];
-            }
-        }
-        if (isset($_SERVER['HTTP_REFERER'])) {
-            $cat_url = mw()->category_manager->get_category_id_from_url($_SERVER['HTTP_REFERER']);
-            if ($cat_url != false) {
-                if (!defined('CATEGORY_ID')) {
-                    define('CATEGORY_ID', intval($cat_url));
-                }
-            }
-        }
-        $file = mw_includes_path() . 'api' . DS . 'api.js';
-
-        $last_modified_time = $lastModified = filemtime($file);
-
-        $ifModifiedSince = (isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) ? $_SERVER['HTTP_IF_MODIFIED_SINCE'] : false);
-        $etagHeader = (isset($_SERVER['HTTP_IF_NONE_MATCH']) ? trim($_SERVER['HTTP_IF_NONE_MATCH']) : false);
-        if (defined('MW_VERSION')) {
-            $etag = md5(filemtime($file) . MW_VERSION);
-        } else {
-            $etag = filemtime($file);
-        }
-
-        $this->app->content_manager->define_constants($ref_page);
-        $l = new \Microweber\View($file);
-
-        $l = $l->__toString();
-        $l = str_replace('{SITE_URL}', $this->app->url_manager->site(), $l);
-        $l = str_replace('{MW_SITE_URL}', $this->app->url_manager->site(), $l);
-        $l = str_replace('%7BSITE_URL%7D', $this->app->url_manager->site(), $l);
-
-        $response = \Response::make($l);
-        $response->header('Content-Type', 'application/javascript');
-
-        $compile_assets = \Config::get('microweber.compile_assets');
-        if ($compile_assets and defined('MW_VERSION')) {
-            $userfiles_dir = userfiles_path();
-            $hash = md5(site_url());
-            $userfiles_cache_dir = normalize_path($userfiles_dir . 'cache' . DS . 'apijs');
-            $userfiles_cache_filename = $userfiles_cache_dir . 'api.' . $hash . '.' . MW_VERSION . '.js';
-            if (!is_file($userfiles_cache_filename)) {
-                if (!is_dir($userfiles_cache_dir)) {
-                    mkdir_recursive($userfiles_cache_dir);
-                }
-                if (is_dir($userfiles_cache_dir)) {
-                    @file_put_contents($userfiles_cache_filename, $l);
-                }
-            } else {
-                $fmd5 = md5_file($userfiles_cache_filename);
-                $fmd = md5($l);
-                if ($fmd5 != $fmd) {
-                    @file_put_contents($userfiles_cache_filename, $l);
-                }
-            }
-        }
-
-        if (!$this->app->make('config')->get('app.debug')) {
-            // enable caching if in not in debug mode
-            $response->header('Etag', $etag);
-            $response->header('Last-Modified', gmdate('D, d M Y H:i:s', $last_modified_time) . ' GMT');
-            $response->setTtl(30);
-        }
-
-        return $response;
+        return (new JsCompileController())->apijs();
     }
 
     public function editor_tools()

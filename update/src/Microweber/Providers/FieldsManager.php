@@ -177,6 +177,11 @@ class FieldsManager
         if (isset($data['rel']) and !isset($data['rel_type'])) {
             $data['rel_type'] = $data['rel'];
         }
+        
+        
+        if (isset($data['options']['field_type']) && !empty($data['options']['field_type'])) {
+        	$data['type'] = $data['options']['field_type'];
+        }
 
         $data_to_save = ($data);
         $data_to_save = $this->unify_params($data_to_save);
@@ -879,10 +884,12 @@ class FieldsManager
 
         if (isset($data['params'])) {
 	        $template_file_option = get_option('data-template', $data['params']['id']);
+	        /*
 	        $template_file_exp = explode('/', $template_file_option);
 	        if (!empty($template_file_exp[0])) {
 	        	$template_file = $template_file_exp[0];
 	        }
+	        */ 
         }
 
         if ($template_file == 'default') {

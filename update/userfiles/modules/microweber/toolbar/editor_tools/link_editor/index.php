@@ -37,7 +37,8 @@
                         return false;
                     }
                 }
-                mw.tools.ajaxSearch({keyword: val, limit: 4}, function () {
+                // is_active: 'y' fails + is a limit required?
+                mw.tools.ajaxSearch({keyword: val, limit: 20}, function () {
                     var lis = [];
                     var json = this;
                     var createLi = function(obj){
@@ -73,7 +74,7 @@
 
         dd_autocomplete('#dd_pages_search');
 
-        mw.$("#insert_email").on('click', function () {alert(1)
+        mw.$("#insert_email").on('click', function () {
             var val = mwd.getElementById('email_field').value;
             if (!val.contains('mailto:')) {
                 val = 'mailto:' + val;
@@ -122,9 +123,14 @@
         display: none;
     }
 
+    #mw-popup-insertlink {
+        overflow:auto;
+    }
+
     .mw-ui-row-nodrop, .media-search-holder {
         margin-bottom: 12px;
     }
+    .media-search-holder .mw-dropdown-content { position: relative; }
 
     .mw-ui-box-content {
         padding-top: 20px;
