@@ -120,6 +120,7 @@ body.mw-live-edit .plain-text {
            Plus
 *****************************/
 
+
 [class*='mw-plus-'] {
     position: absolute;
     visibility: visible;
@@ -128,7 +129,11 @@ body.mw-live-edit .plain-text {
     width: 16px;
     height: 16px;
     border-radius: 30px;
-    background-color: #CCCCCC;
+    background-color: #e0e0e0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='white' d='M24 10h-10v-10h-4v10h-10v4h10v10h4v-10h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 10px 10px;
     cursor: pointer;
     left: -9999px;
     top: -9999px;
@@ -142,7 +147,11 @@ body.mw-live-edit .plain-text {
     transition: opacity 0.3s;
 
 }
-
+/*[class*='mw-plus-']:after {
+    content: '\002b';
+    font-family: Microweber !important;
+    text-transform: none !important;
+}*/
 .mw-plus-top {
     margin-top: -10px;
 }
@@ -151,28 +160,11 @@ body.mw-live-edit .plain-text {
     margin-top: -10px;
 }
 
-[class*='mw-plus-']:after {
-    display: block;
-    position: absolute;
-    top: 50%;
-    margin-top: -5px;
-    right: -1px;
-    content: '';
-    width: 10px;
-    height: 10px;
-    background-color: #CCCCCC;
-    -webkit-transform: rotate(45deg);
-    -moz-transform: rotate(45deg);
-    -ms-transform: rotate(45deg);
-    -o-transform: rotate(45deg);
-    transform: rotate(45deg);
-    z-index: -1;
-}
 
-[class*='mw-plus-'].active, [class*='mw-plus-'].active:after,
-[class*='mw-plus-']:hover,
-[class*='mw-plus-']:hover:after {
-    background-color: #434343;
+
+[class*='mw-plus-'].active,
+[class*='mw-plus-']:hover{
+    background-color: #0086db;
 }
 
 [class*='mw-plus-']:active {
@@ -2308,7 +2300,7 @@ body.dragStart .empty-element {
 
 .mw-toolbar-right-content {
     float: right;
-    padding: 10px 3px 10px 0;
+    padding: 9px 3px 9px 0;
 }
 
 #toolbar-dropdown-actions {
@@ -2756,8 +2748,6 @@ div[id*='SSDIVEL'] {
 }
 
 .mw-tooltip-insert-module .mw-ui-searchfield {
-    position: absolute;
-    right: 10px;
     border-radius: 3px 3px 0 0;
     border-bottom-width: 0;
 }
@@ -3101,6 +3091,7 @@ div[id*='SSDIVEL'] {
     float: left;
     text-align: center;
     padding: 0px;
+    list-style: none;
 }
 
 .module-item-module .mw_module_hold {
@@ -4566,5 +4557,20 @@ p.element,
 div.element,
 section.element{
     min-height: 15px;
+}
+
+
+#mw-plus-tooltip-selector .mw-ui-searchfield{
+    width: 100%;
+    height: auto;
+    border: 1px solid #E6E6E6;
+    -webkit-appearance: textfield;
+    appearance: textfield;
+}
+#mw-plus-tooltip-selector .mw-ui-searchfield:focus{
+    border-color: #c6c6c6;
+}
+#mw-plus-tooltip-selector .mw-ui-btn-nav{
+    display: none;
 }
 

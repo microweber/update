@@ -32,7 +32,7 @@
         background-color: rgba(0,0,0,.2);
     }
     .mw-dialog-holder{
-        position: absolute;
+        position: absolute !important;
         z-index: 2;
     }
     &.mw-dialog-iframe iframe{
@@ -49,6 +49,7 @@
 }
 
 .mw-dialog-skin-default{
+    visibility: hidden;
     .mw-dialog-header{
         min-height: 40px;
         background-color: #2b2b2b;
@@ -101,11 +102,20 @@
             transition: none;
         }
     }
+    .mw-dialog-overlay{
+        opacity: 0;
+        visibility: hidden;
+    }
     &.active{
+        visibility: visible;
         .mw-dialog-holder{
             visibility: visible;
             opacity: 1;
             transform: translateY(0);
+        }
+        .mw-dialog-overlay{
+            opacity: 1;
+            visibility: visible;
         }
     }
     .mw-dialog-close{
@@ -141,6 +151,13 @@
             opacity: 0;
             min-height: 100px;
         }
+    }
+}
+
+html[dir='rtl'] {
+    .mw-dialog-close{
+        right: auto;
+        left: 0;
     }
 }
 

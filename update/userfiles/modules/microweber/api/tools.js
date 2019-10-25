@@ -878,24 +878,7 @@ mw.tools = {
             return new mw.tools.modal._init(o);
         },
         get: function (selector) {
-            var el = mw.$(selector),
-                child_cont = el.find(".mw_modal_container:first"),
-                parent_cont = el.parents(".mw_modal_container:first");
-            if(!el[0]){
-                return false;
-            }
-            else if(el[0]._dialog){
-                return el[0]._dialog;
-            }
-            else if (child_cont.length !== 0) {
-                return child_cont.parent()[0].modal;
-            }
-            else if (parent_cont.length !== 0) {
-                return parent_cont.parent()[0].modal;
-            }
-            else {
-                return false;
-            }
+            return mw.dialog.get(selector);
         },
         minimize: function (id) {
             var doc = mwd;
@@ -2311,7 +2294,7 @@ mw.tools = {
         }
 
 
-        ok.on('keyup', function (e) {
+        ok.on('keydown', function (e) {
             if (e.keyCode === 13 || e.keyCode === 32) {
                 callback.call(window);
                 modal.remove();
@@ -5298,6 +5281,9 @@ mw.extradataForm = function (options, data) {
             content: form,
             title: data.error
         });
+        mw.$('script', form).each(function() {
+            eval($(this).text());
+        });
 
         if(data.form_data_required) {
             mw.$(form).on('submit', function (e) {
@@ -5520,8 +5506,9 @@ mw.tabAccordion = function (options, accordion) {
         mw.$(window).on('load resize orientationchange', function () {
             scope.breakPoint();
         });
-    }
+    };
 
     this.init();
-}
+};
+
 
