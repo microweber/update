@@ -475,6 +475,7 @@ mw.wysiwyg = {
         var align;
         var node = window.getSelection().focusNode;
         var elementNode = mw.wysiwyg.validateCommonAncestorContainer(node);
+        console.log(elementNode, mw.wysiwyg.isSafeMode(elementNode))
         if (mw.wysiwyg.isSafeMode(elementNode) && arr.indexOf(a) !== -1) {
             align = a.split('justify')[1].toLowerCase();
             if (align === 'full') {
@@ -728,7 +729,7 @@ mw.wysiwyg = {
     prepare: function () {
         mw.wysiwyg.external = mw.wysiwyg._external();
         mw.$("#liveedit_wysiwyg").on("mousedown mouseup click", function (event) {
-            event.preventDefault();
+            event.preventDefault()
         });
         var items = mw.$(".element").not(".module");
         mw.$(".mw_editor").hover(function () {
@@ -1737,7 +1738,8 @@ mw.wysiwyg = {
             height: 'auto',
             autoHeight: true
         }, function(result){
-            mw.iframecallbacks.insert_link(result.url, (result.target || '_self') , result.text);
+            console.log(result)
+            mw.iframecallbacks.insert_link(result.url, result.target, result.text);
         });
 
 
@@ -2517,36 +2519,22 @@ mw.wysiwyg.dropdowns = function () {
                     var div = mw.wysiwyg.applier('div');
                     div.innerHTML = new_insert_html;
                 }
-            } else if (val === 'icon') {
-
-                var icdiv = mw.wysiwyg.applier('i');
-                icdiv.className = "mw-icon mw-icon-noop";
-
-                var mode = 3;
-                if(mode === 3) {
-                    mw.liveedit.widgets.iconEditor(icdiv);
-                }
-                if(mode === 2) {
-                    var dialog = mw.icons.dialog();
-                    $(dialog).on('Result', function(e, res){
-                        res.render(res.icon, icdiv);
-                        dialog.remove();
-                    })
-                }
-                if(mode === 1) {
-
+            } else if (val == 'icon') {
+                var new_insert_html = '';
+                if (new_insert_html != null) {
+                    var div = mw.wysiwyg.applier('i');
+                    div.innerHTML = new_insert_html;
+                    div.className = "mw-icon mw-icon-noop";
                     mw.iconSelector.uiHTML();
-                    mw.iconSelector._activeElement = icdiv;
+                    mw.iconSelector._activeElement = div;
                     mw.$(".mw-live-edit-component-options").hide();
                     setTimeout(function () {
                         mw.iconSelector.uiHTML();
                         mw.iconSelector.settingsUI();
                         mw.sidebarSettingsTabs.set(2)
-                    }, 10);
+                    }, 10)
+
                 }
-
-
-
             }
             else if (val === 'table') {
                 var el = mw.wysiwyg.applier('div', 'element', {width: "100%"});
@@ -2633,15 +2621,22 @@ $(mwd).ready(function () {
 });
 $(window).on('load', function () {
 
+//mw.wysiwyg.initFontSelectorBox();
+
+    /*$("#live_edit_toolbar .editor_wrapper_tabled [title], #the_admin_editor #mw-admin-text-editor [title], #mw_small_editor [title]").each(function () {
+     var ttitle = this.title;
+     mw.$(this).removeAttr('title').addClass('tip').attr('data-tip', ttitle).attr('data-tipposition', 'bottom-center')
+     })
+     mw.$('#the_admin_editor #mw-admin-text-editor .tip:first').attr('data-tipposition', 'bottom-left');*/
+
+    /*mw.$(".edit").on('paste', function(e){
+     mw.wysiwyg.paste(e)
+     }) */
+
     mw.$(this).on('imageSrcChanged', function (e, el, url) {
-        var node = mw.tools.firstParentOrCurrentWithAnyOfClasses(el, ['mw-image-holder']);
-        if (node) {
-            url = mw.files.safeFilename(url);
-            var img = node.querySelector('img');
-            if(img) {
-                img.src = url;
-            }
-            mw.$(node).css('backgroundImage', 'url(' + url + ')');
+        if ($(el).parent().hasClass('mw-image-holder')) {
+            var url = mw.files.safeFilename(url)
+            mw.$(el).parent().css('backgroundImage', 'url(' + url + ')')
         }
     });
 

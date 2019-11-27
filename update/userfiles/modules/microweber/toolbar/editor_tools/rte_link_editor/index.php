@@ -12,11 +12,9 @@
         var args = Array.prototype.slice.call(arguments);
 
         if(parent.mw.iframecallbacks[hash]) {
-            console.log(1)
-            // parent.mw.iframecallbacks[hash].apply( this, arguments );
+            parent.mw.iframecallbacks[hash].apply( this, arguments );
         }
         if(window.thismodal){
-            console.log(2)
             thismodal.result({
                 url: args[1],
                 target: args[2],
@@ -322,7 +320,10 @@
                 </script>
             </div>
             <div class="tab page-layout-tab">
-
+                <label class="mw-ui-label"><?php _e('Link text'); ?></label>
+                <div class="mw-field">
+                    <input type="text" id="ltext">
+                </div>
                 <ul class="mw-ui-box mw-ui-box-content mw-ui-navigation" id="layouts-selector">
 
                 </ul>
@@ -332,7 +333,7 @@
                     submitLayoutLink = function(){
                         var selected = $('#layouts-selector input:checked');
                         var val = top.location.href.split('#')[0] + '#mw@' + selected[0].id;
-                        RegisterChange(hash, val, '_self', mw.$('#customweburl_text').val().trim() || undefined);
+                        RegisterChange(hash, val, '_self', mw.$('#ltext').val() || selected[0].id);
                     };
                     $(document).ready(function () {
                         var layoutsData = [];
