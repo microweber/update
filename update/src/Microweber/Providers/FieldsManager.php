@@ -142,6 +142,7 @@ class FieldsManager
                         $make_field['position'] = $pos;
                         $make_field['name'] = ucfirst($field_name);
                         $make_field['value'] = '';
+                        $make_field['show_label'] = 1;
                         $make_field['type'] = $field_type;
                         $make_field['options']['field_type'] = $field_type;
 
@@ -210,6 +211,14 @@ class FieldsManager
         	$data['type'] = $data['options']['field_type'];
         }
 
+        if (isset($data['custom_field_show_label'])) {
+            if ($data['custom_field_show_label'] == 'y') {
+                $data['show_label'] = 1;
+            } else {
+                $data['show_label'] = 0;
+            }
+        }
+
         $data_to_save = ($data);
         $data_to_save = $this->unify_params($data_to_save);
 
@@ -233,9 +242,9 @@ class FieldsManager
                 if (isset($form_data_from_id['type']) and $form_data_from_id['type'] != '' and (!isset($data_to_save['type']) or ($data_to_save['type']) == '')) {
                     $data_to_save['type'] = $form_data_from_id['type'];
                 }
-               /* if (isset($form_data_from_id['name']) and $form_data_from_id['name'] != '' and (!isset($data_to_save['name']) or ($data_to_save['name']) == '')) {
+                if (isset($form_data_from_id['name']) and $form_data_from_id['name'] != '' and (!isset($data_to_save['name']) or ($data_to_save['name']) == '')) {
                     $data_to_save['name'] = $form_data_from_id['name'];
-                }*/
+                }
             }
 
             if (isset($data_to_save['copy_rel_id'])) {
@@ -271,7 +280,11 @@ class FieldsManager
         if (!isset($data_to_save['type']) or trim($data_to_save['type']) == '') {
             return array('error' => 'You must set type');
         } else {
-            
+
+            if (isset($data_to_save['name']) && empty($data_to_save['name'])) {
+                return array('error' => 'You must set name');
+            }
+
             if (isset($data_to_save['name'])) {
                 $cf_k = $data_to_save['name'];
                 if ($cf_k != false and !isset($data_to_save['name_key'])) {
@@ -293,6 +306,14 @@ class FieldsManager
             }
 
             $save = $this->app->database_manager->save($data_to_save_parent);
+
+            if (!isset($data_to_save['value'])) {
+                if ($data_to_save['type'] == 'radio' || $data_to_save['type'] == 'checkbox' || $data_to_save['type'] == 'dropdown') {
+                    $data_to_save['value'][] = 'option 1';
+                    $data_to_save['value'][] = 'option 2';
+                    $data_to_save['value'][] = 'option 3';
+                }
+            }
 
             if (isset($data_to_save['value'])) {
                 $custom_field_id = $save;
@@ -937,6 +958,7 @@ class FieldsManager
         $field_settings['rows'] = '5';
         $field_settings['make_select'] = false;
         $field_settings['options']['file_types'] = array();
+        $field_settings['show_label'] = true;
 
         if (isset($data['id'])) {
             $field_data['id'] = $data['id'];
@@ -983,6 +1005,10 @@ class FieldsManager
 
         if (isset($data['options']['required'])) {
             $field_settings['required'] = true;
+        }
+
+        if (isset($data['show_label'])) {
+            $field_settings['show_label'] = $data['show_label'];
         }
 
         if (isset($data['params']['input_class'])) {
