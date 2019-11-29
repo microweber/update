@@ -1,14 +1,30 @@
-if(!Object.assign) {
-     Object.assign =  function assign(target, source) {
-        var result = {}
-        for (var i in target) result[i] = target[i]
-        for (var i in source) result[i] = source[i]
-        return result
-      }
+if (typeof Object.assign !== 'function') {
+    Object.defineProperty(Object, "assign", {
+        value: function assign(target) {
+            'use strict';
+            if (target === null || target === undefined) {
+                throw new TypeError('Cannot convert undefined or null to object');
+            }
+            var to = Object(target);
+            for (var index = 1; index < arguments.length; index++) {
+                var nextSource = arguments[index];
+                if (nextSource !== null && nextSource !== undefined) {
+                    for (var nextKey in nextSource) {
+                        if (Object.prototype.hasOwnProperty.call(nextSource, nextKey)) {
+                            to[nextKey] = nextSource[nextKey];
+                        }
+                    }
+                }
+            }
+            return to;
+        },
+        writable: true,
+        configurable: true
+    });
 }
 
 
-if (typeof jQuery == 'undefined') {
+if (!window.jQuery) {
 
 <?php
 
@@ -34,16 +50,15 @@ var _jqxhr = jQuery.ajax;
 
 
 
-jQuery.ajax = $.ajax = function(url, options){
+jQuery.ajax = function(url, options){
     options = options || {};
-    settings = {};
+    var settings = {};
     if(typeof url === 'object'){
         $.extend(settings, url);
     }
     else{
         settings.url = url;
     }
-    $.extend(settings,options);
     if(typeof settings.success === 'function'){
         settings._success = settings.success;
         delete settings.success;
@@ -62,6 +77,7 @@ jQuery.ajax = $.ajax = function(url, options){
             }
         };
     }
+    settings = $.extend({}, settings, options);
     var xhr = _jqxhr(settings);
     return xhr;
 };
@@ -221,6 +237,7 @@ mw.askusertostay = false;
     url = url.contains('//') ? url : (t !== "css" ? "<?php print( mw_includes_url() ); ?>api/" + url  :  "<?php print( mw_includes_url() ); ?>css/" + url);
     if(!urlModified) toPush = url;
     if (!~mw.required.indexOf(toPush)) {
+
       mw.required.push(toPush);
       url = url.contains("?") ?  url + '&mwv=' + mw.version : url + "?mwv=" + mw.version;
       if(document.querySelector('link[href="'+url+'"],script[src="'+url+'"]') !== null){
@@ -926,25 +943,33 @@ mw.parent = function(){
     }
     return window.mw;
 };
+
 mw.top = function(){
+  if(!!mw.__top){
+      return mw.__top;
+  }
   var getLastParent = function() {
       var curr = window.parent;
       while(curr && mw.tools.canAccessWindow(curr) && curr.mw){
           parents.push(curr);
           curr = curr.parent;
       }
+      mw.__top = curr.mw;
       return curr.mw;
   };
   if(window === top){
+    mw.__top = window.mw;
     return window.mw;
   } else {
         if(mw.tools.canAccessWindow(top) && top.mw){
+            mw.__top = top.mw;
             return top.mw;
         } else{
             if(window.top !== window.parent){
                 return getLastParent();
             }
             else{
+                mw.__top = window.mw;
                 return window.mw;
             }
         }
