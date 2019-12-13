@@ -20,7 +20,7 @@ mw.iframecallbacks = {
         if (!contains && !!url) {
             //url = url.indexOf("http") === 0 ? url : (location.protocol + "//" + url);
         }
-        var target = target || '_self';
+        target = target || '_self';
 
         var link_inner_text = false
         if(link_content){
@@ -155,26 +155,7 @@ mw.iframecallbacks = {
     change_shadow_color: function (color) {
         return mw.wysiwyg.change_shadow_color(color);
     },
-    ьeditimage: function (url) {
 
-
-        if(mw.image.currentResizing) {
-            if (mw.image.currentResizing[0].nodeName == 'IMG') {
-                mw.image.currentResizing.attr("src", url);
-                mw.image.currentResizing.css('height', 'auto');
-            }
-            else {
-                mw.image.currentResizing.css("backgroundImage", 'url(' + mw.files.safeFilename(url) + ')');
-                top.mw.wysiwyg.bgQuotesFix(parent.mw.image.currentResizing[0])
-            }
-
-            mw.wysiwyg.change(mw.image.currentResizing[0]);
-            parent.mw.image.currentResizing.load(function () {
-                parent.mw.image.resize.resizerSet(this);
-            });
-        }
-
-    },
     add_link_to_menu: function () {
 
     },

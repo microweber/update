@@ -645,15 +645,16 @@ mw.tools = {
         init: function (o, wl) {
 
             var orig_options = o;
-            var o = mw.tools.tooltip.prepare(o);
+            o = mw.tools.tooltip.prepare(o);
             if (o === false) return false;
+            var tip;
             if (o.id && mw.$('#' + o.id).length > 0) {
-                var tip = mw.$('#' + o.id)[0];
+                tip = mw.$('#' + o.id)[0];
             } else {
-                var tip = mw.tools.tooltip.source(o.content, o.skin, o.position, o.id);
+                tip = mw.tools.tooltip.source(o.content, o.skin, o.position, o.id);
             }
             tip.tooltipData = o;
-            var wl = wl || true;
+            wl = typeof wl === 'undefined' ? true : wl;
             if (o.group) {
                 var tip_group_class = 'mw-tooltip-group-' + o.group;
                 var cur_tip = mw.$(tip)
@@ -4289,10 +4290,10 @@ $(document).ready(function () {
         }
     });
 
-    mw.$(".mw-ui-dropdown").on('touchstart mousedown', function(){
+    mw.$(".mw-ui-dropdown").on('click', function(){
         mw.$(this).toggleClass('active')
     });
-    mw.$(document.body).on('touchend', function(e){
+    mw.$(document.body).on('click', function(e){
         if(!mw.tools.hasAnyOfClassesOnNodeOrParent(e.target, ['mw-ui-dropdown'])){
             mw.$(".mw-ui-dropdown.active").removeClass('active')
         }
@@ -4898,7 +4899,7 @@ mw._colorPicker = function (options) {
 
         if ($el[0].nodeName === 'INPUT') {
             $el.on('focus', function (e) {
-                if(this.value){
+                if(this.value ){
                     frame.color = this.value;
                 }
                 mw.$(tip).show();
