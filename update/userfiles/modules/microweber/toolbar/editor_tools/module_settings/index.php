@@ -116,7 +116,9 @@
             if (window.thismodal && thismodal.main) {
                 var holder = $(".mw_modal_toolbar", thismodal.main);
                 if ($('.mw_modal_icon', holder).length === 0) {
+                    <?php if(is_array($module_info) and isset($module_info['icon'])) :  ?>
                     holder.prepend('<span class="mw_modal_icon"><img src="<?php print $module_info['icon']; ?>"></span>')
+                    <?php endif; ?>
                 }
             }
         };
@@ -157,7 +159,7 @@
         if (typeof thismodal != 'undefined' && thismodal != false) {
             var modal_title_str = '';
             if (typeof(mw_module_settings_info.name) == "undefined") {
-                modal_title_str = "<?php _e("Settings"); ?>"
+                modal_title_str = "<?php _ejs("Settings"); ?>"
             } else {
                 modal_title_str = mw_module_settings_info.name;
             }
@@ -413,7 +415,7 @@
             var settings_container_mod_el = $('#settings-container');
             mw.options.form(settings_container_mod_el, function () {
                 if (mw.notification) {
-                    mw.notification.success('<?php _e('Settings are saved') ?>');
+                    mw.notification.success('<?php _ejs('Settings are saved') ?>');
                 }
                 mw.reload_module_parent('#<?php print $params['id']  ?>')
 

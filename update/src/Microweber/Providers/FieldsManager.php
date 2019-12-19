@@ -155,7 +155,6 @@ class FieldsManager
             return;
         }
         */
-        $_mw_made_default_fields_register[$function_cache_id] = true;
 
         $table_custom_field = $this->table;
 
@@ -272,6 +271,7 @@ class FieldsManager
                 }
             }
         }
+        $_mw_made_default_fields_register[$function_cache_id] = $saved_fields;
 
         return $saved_fields;
     }
@@ -1303,12 +1303,18 @@ class FieldsManager
         $template_from_html_option = false;
 
         if (isset($data['params']['id'])) {
-            $template_from_option = get_option('data-template', $data['params']['id']);
+            if (get_option('data-template', $data['params']['id'])) {
+                $template_from_option = get_option('data-template', $data['params']['id']);
+            }
         }
+
         if (isset($data['id'])) {
-            $template_from_option = get_option('data-template', $data['id']);
+            if (get_option('data-template', $data['id'])) {
+                $template_from_option = get_option('data-template', $data['id']);
+            }
         }
-        if (isset($data['params']['template'])) {
+
+        if (isset($data['params']['template']) && $data['params']['template']) {
             $template_from_html_option = $data['params']['template'];
         }
 
