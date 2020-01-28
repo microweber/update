@@ -1,5 +1,7 @@
 
 
+
+
 <div id="tree"></div>
 
 <script type="text/javascript">
@@ -8,12 +10,34 @@
     mw.require("events.js");
     mw.require("forms.js");
     mw.require("files.js");
-    mw.require("tools.js");
     mw.require("url.js");
     mw.require('prop_editor.js');
     mw.require('color.js');
-    mw.require('selector.js')
-    mw.require('tree.js')
+    mw.require('selector.js');
+    mw.require('tree.js');
+
+    mw.require('domtree.js');
+    $(window).on('load', function () {
+
+
+      /*  setTimeout(function() {
+
+            mw.top().liveEditDomTree = new mw.DomTree({
+                element: '#domtree',
+                targetDocument: mw.top().win.document,
+                onHover: function (e, target, node, element) {
+                    mw.top().liveEditSelector.setItem(node, mw.top().liveEditSelector.interactors, false);
+                },
+                onSelect: function (e, target, node, element) {
+                    setTimeout(function () {
+                        mw.top().liveEditSelector.select(node);
+                    })
+                }
+            });
+        }, 1111)*/
+
+    })
+
 </script>
 <script>
 

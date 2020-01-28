@@ -128,6 +128,33 @@ if ($autoplay) {
     $autoplay = 'true';
 }
 
+$autoplaySpeed = get_option('autoplay_speed', $params['id']);
+if ($autoplaySpeed) {
+    $autoplaySpeed = $autoplaySpeed;
+} elseif (isset($params['autoplay_speed'])) {
+    $autoplaySpeed = $params['autoplay_speed'];
+} else {
+    $autoplaySpeed = '2000';
+}
+
+$pauseOnHover = get_option('pauseOnHover', $params['id']);
+if ($pauseOnHover) {
+    $pauseOnHover = $pauseOnHover;
+} elseif (isset($params['pauseOnHover'])) {
+    $pauseOnHover = $params['pauseOnHover'];
+} else {
+    $pauseOnHover = true;
+}
+
+$pauseOnHover = get_option('pause_on_hover', $params['id']);
+if ($pauseOnHover) {
+    $pauseOnHover = $pauseOnHover;
+} elseif (isset($params['pause_on_hover'])) {
+    $pauseOnHover = $params['pause_on_hover'];
+} else {
+    $pauseOnHover = 'true';
+}
+
 //bxSlider
 $mode = get_option('mode', $params['id']);
 if ($mode) {
@@ -148,15 +175,6 @@ if ($hideControlOnEnd) {
 }
 
 //Slick
-$pauseOnHover = get_option('pause_on_hover', $params['id']);
-if ($pauseOnHover) {
-    $pauseOnHover = $pauseOnHover;
-} elseif (isset($params['pause_on_hover'])) {
-    $pauseOnHover = $params['pause_on_hover'];
-} else {
-    $pauseOnHover = 'true';
-}
-
 $responsive = get_option('responsive', $params['id']);
 if ($responsive) {
     $responsive = $responsive;

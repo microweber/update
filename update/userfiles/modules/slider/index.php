@@ -102,15 +102,13 @@ if (is_file($template_file)) {
                 controls: <?php print $controls ? $controls : 'undefined'; ?>,
                 infiniteLoop: <?php print $loop ? $loop : 'undefined'; ?>,
                 adaptiveHeight: <?php print $adaptiveHeight ? $adaptiveHeight : 'undefined'; ?>,
-                speed: '<?php print $speed ? $speed : 'undefined'; ?>',
                 auto: '<?php print $autoplay ? $autoplay : 'undefined'; ?>',
-
+                autoHover: '<?php print $pauseOnHover ? $pauseOnHover : 'undefined'; ?>',
+                pause: '<?php print $autoplaySpeed ? $autoplaySpeed : '3000'; ?>',
                 hideControlOnEnd:  <?php print $hideControlOnEnd ? $hideControlOnEnd : 'undefined'; ?>,
                 mode: '<?php print $mode ? $mode : 'undefined'; ?>',
                 prevText: '<?php print $prevText ? $prevText : 'undefined'; ?>',
                 nextText: '<?php print $nextText ? $nextText : 'undefined'; ?>',
-                prevSelector: '<?php print $prevSelector ? $prevSelector : 'undefined'; ?>',
-                nextSelector: '<?php print $nextSelector ? $nextSelector : 'undefined'; ?>',
                 touchEnabled: <?php print $touchEnabled ? $touchEnabled : 'undefined'; ?>,
                 captions: true,
                 onSliderLoad: function () {
@@ -134,7 +132,7 @@ if (is_file($template_file)) {
                 arrows: <?php print $controls; ?>,
                 infinite: <?php print $loop; ?>,
                 adaptiveHeight: <?php print $adaptiveHeight; ?>,
-                autoplaySpeed: <?php print $speed; ?>,
+                autoplaySpeed: <?php print $autoplaySpeed; ?>,
                 //speed: '<?php print $speed; ?>',
                 speed: 500,
 

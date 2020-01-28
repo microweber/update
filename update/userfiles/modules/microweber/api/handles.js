@@ -367,7 +367,7 @@ mw._initHandles = {
                 mw.dragCurrent = mw.ea.data.currentGrabbed = mw._activeElementOver;
 
                 if(!mw.dragCurrent.id){
-                    mw.dragCurrent.id = 'element_' + mw.random()
+                    mw.dragCurrent.id = 'element_' + mw.random();
                 }
                 mw.$(mw.dragCurrent).invisible().addClass("mw_drag_current");
                 mw.trigger("AllLeave");
@@ -378,7 +378,7 @@ mw._initHandles = {
                 mw.smallEditor.css("visibility", "hidden");
                 mw.smallEditorCanceled = true;
             },
-            stop: function() {
+            stop: function(a,b,c) {
                 mw.$(mwd.body).removeClass("dragStart");
             }
         });
@@ -545,6 +545,9 @@ mw._initHandles = {
             if(el && el.nodeType === 1){
                 return el;
             }
+            if(mw.handleModuleActive._target) {
+                return mw.handleModuleActive._target;
+            }
         };
 
         var getDragCurrent = function () {
@@ -612,6 +615,7 @@ mw._initHandles = {
 
         var positionModuleHandle = function(e, pelement, handle){
 
+
             var element ;
 
             if(handle.type === 'hover') {
@@ -621,6 +625,7 @@ mw._initHandles = {
                 //pelement = mw.tools.lastMatchesOnNodeOrParent(pelement, ['.module']);
 
                 element = dynamicModulesMenu(e, pelement) || pelement;
+                handle._target = pelement;
             }
 
             mw.$(".mw-handle-menu-dynamic", handle.wrapper).empty();
@@ -628,12 +633,13 @@ mw._initHandles = {
             var $el, hasedit;
             if(element && element.getAttribute('data-type') === 'layouts'){
                 $el = mw.$(element);
-                hasedit = mw.tools.parentsOrCurrentOrderMatchOrOnlyFirst($el[0],['edit', 'module']);
+                hasedit = mw.tools.parentsOrCurrentOrderMatchOrOnlyFirst($el[0].parentNode,['edit', 'module']);
+
                 if(hasedit){
-                    if($el.prev('[data-type="layouts"]').length !== 0){
+                    if($el.prev('[data-type="layouts"]')[0]){
                         mw.$('.mw_handle_module_up').show();
                     }
-                    if($el.next('[data-type="layouts"]').length !== 0){
+                    if($el.next('[data-type="layouts"]')[0]){
                         mw.$('.mw_handle_module_down').show();
                     }
                 }
@@ -700,20 +706,7 @@ mw._initHandles = {
                 }).addClass('mw-active-item');
 
 
-            mw.$('.mw_handle_module_up, .mw_handle_module_down').hide();
 
-            if(element && element.getAttribute('data-type') === 'layouts'){
-                $el = mw.$(element);
-                hasedit =  mw.tools.hasParentsWithClass($el[0],'edit');
-                if(hasedit){
-                    if($el.prev('[data-type="layouts"]').length !== 0){
-                        mw.$('#mw_handle_module_up').show();
-                    }
-                    if($el.next('[data-type="layouts"]').length !== 0){
-                        mw.$('#mw_handle_module_down').show();
-                    }
-                }
-            }
 
             var canDrag = mw.tools.parentsOrCurrentOrderMatchOrOnlyFirst(element.parentNode, ['edit', 'module'])
                 && mw.tools.parentsOrCurrentOrderMatchOrOnlyFirstOrNone(element, ['allow-drop', 'nodrop']);
@@ -943,4 +936,7 @@ $(document).ready(function () {
     mw._initHandles.elements();
     mw._initHandles.columns();
     mw._initHandles.nodeLeave();
+
+
+
 });

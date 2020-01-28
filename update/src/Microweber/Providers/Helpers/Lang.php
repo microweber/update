@@ -19,6 +19,8 @@ class Lang
 {
     /** @var \Microweber\Application */
     public $app;
+    public $is_enabled = null;
+    private $__default_lang_option = false;
 
 
     public function __construct($app = null)
@@ -27,6 +29,15 @@ class Lang
             $this->app = $app;
         } else {
             $this->app = mw();
+        }
+
+
+        if(mw_is_installed()){
+            $this->is_enabled = true;
+        }
+
+        if($this->is_enabled) {
+            $this->__default_lang_option = get_option('language', 'website');
         }
     }
 
@@ -68,7 +79,9 @@ class Lang
 
     function default_lang()
     {
+        if($this->is_enabled){
         return get_option('language', 'website');
+        }
     }
 
     function __store_lang_file_ns($lang = false)
@@ -327,6 +340,7 @@ class Lang
         return $out;
     }
 
+
     function lang($title, $namespace = false)
     {
         global $mw_language_content;
@@ -362,6 +376,16 @@ class Lang
 
 
         if (isset($mw_language_content_file[$k1]) == false) {
+
+            $current_language = $this->current_lang();
+
+
+            $to_save = false;
+            if ( $this->__default_lang_option and $current_language ==  $this->__default_lang_option) {
+                $to_save = true;
+            }
+
+
             if (!$namespace) {
                 $k2 = ($title_value);
                 $mw_new_language_entries[$k1] = $k2;
@@ -371,7 +395,7 @@ class Lang
                     define('MW_LANG_STORE_ON_EXIT_EVENT_BINDED', 1);
                     $scheduler = new \Microweber\Providers\Event();
                     // schedule a global scope function:
-                    if ($environment != 'testing') {
+                    if ($to_save and $environment != 'testing') {
                         $scheduler->registerShutdownEvent('__store_lang_file', $lang);
                     }
                     // $scheduler->registerShutdownEvent('__store_lang_file');
@@ -393,7 +417,7 @@ class Lang
                     if (!defined('MW_LANG_STORE_ON_EXIT_EVENT_BINDED_NS')) {
                         define('MW_LANG_STORE_ON_EXIT_EVENT_BINDED_NS', 1);
                         $scheduler = new \Microweber\Providers\Event();
-                        if ($environment != 'testing') {
+                        if ($to_save and $environment != 'testing') {
                             $scheduler->registerShutdownEvent('__store_lang_file_ns', $lang);
                         }
                     }

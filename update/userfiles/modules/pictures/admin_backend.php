@@ -31,17 +31,7 @@
 </style>
 <?php
 
-//
-//$init_image_options = array();
-//$default_image_options = 'Tags, Author, Source, Link';
-//$image_options = isset($params['image-options']) ? $params['image-options'] : isset($params['data-image-options']) ? $params['data-image-options'] : $default_image_options;
-//
-//
-//$temp = explode(',', $image_options);
-//foreach ($temp as $i) {
-//    array_push($init_image_options, trim($i));
-//}
-//
+
 
 if (!isset($for_id)) {
     $for_id = 0;
@@ -418,7 +408,6 @@ if (!isset($data["thumbnail"])) {
             });
 
             $(uploader).on("FileUploaded done", function (e, a) {
-                console.log(a)
                 if (a && a.ask_user_to_enable_auto_resizing) {
                     mw.module_pictures.open_image_upload_settings_modal();
                 }

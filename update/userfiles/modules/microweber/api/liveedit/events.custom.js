@@ -7,18 +7,35 @@ mw.liveedit.handleCustomEvents = function() {
         }
     });
 
-    mw.on("ImageClick ElementClick ModuleClick", function(e, el, originalEvent){
+    /*mw.on("ImageClick ElementClick ModuleClick", function(e, el, originalEvent){
         if(originalEvent) {
             el = mw.tools.firstParentOrCurrentWithAnyOfClasses(originalEvent.target, ['element', 'module'])
         }
-        //if(el.id) {
         mw.liveEditSelector.select(el);
-            if(mw.tools.hasClass(el, 'module')){
-                mw.liveEditSelector.activeModule = el;
-            }
+        if(mw.tools.hasClass(el, 'module')){
+            mw.liveEditSelector.activeModule = el;
+        }
+    });*/
 
-        //}
+    mw.$(document.body).on('click', function (e) {
+        var target = e.target;
+        var can = mw.tools.firstParentOrCurrentWithAnyOfClasses(target, [
+           'edit', 'module', 'element'
+        ]);
+        if(can) {
+            var toSelect = mw.tools.firstNotInlineLevel(target);
+
+            mw.liveEditSelector.select(toSelect);
+
+            if(mw.liveEditDomTree) {
+                mw.liveEditDomTree.select(mw.wysiwyg.validateCommonAncestorContainer(target));
+
+            }
+        }
+
+
     });
+
 
     mw.on("DragHoverOnEmpty", function(e, el) {
         if ($.browser.webkit) {
@@ -106,7 +123,6 @@ mw.liveedit.handleCustomEvents = function() {
         if (mw.liveedit && mw.liveedit.inline) {
             mw.liveedit.inline.setActiveCell(el, e);
             var td_parent_table = mw.tools.firstParentWithTag(el, 'table');
-            console.log(td_parent_table)
             if (td_parent_table) {
                 mw.liveedit.inline.tableController(td_parent_table);
             }

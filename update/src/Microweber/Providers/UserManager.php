@@ -2,6 +2,7 @@
 
 namespace Microweber\Providers;
 
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Config;
 use Laravel\Socialite\SocialiteManager;
@@ -141,6 +142,7 @@ class UserManager
         }
 
         $login_captcha_enabled = get_option('login_captcha_enabled', 'users') == 'y';
+
         if ($login_captcha_enabled) {
             if (!isset($params['captcha'])) {
                 return array('error' => 'Please enter the captcha answer!');
@@ -151,20 +153,23 @@ class UserManager
             }
         }
 
-        // On some hostings if the parameters contain base64, $_GET is null
-        if (!isset($params['username']) and isset($params['username_base64']) and $params['username_base64']) {
-            $params['username'] = @base64_decode($params['username_base64']);
-        }
-        if (!isset($params['password']) and isset($params['password_base64']) and $params['password_base64']) {
-            $params['password'] = @base64_decode($params['password_base64']);
-        }
-
         // So we use second parameter
         if (!isset($params['username']) and isset($params['username_encoded']) and $params['username_encoded']) {
-            $params['username'] = @base64_decode($params['username_encoded']);
+            $decoded_username = @base64_decode($params['username_encoded']);
+            if (!empty($decoded_username)) {
+                $params['username'] = $decoded_username;
+            } else {
+                $params['username'] = @base62_decode($params['username_encoded']);
+            }
         }
+
         if (!isset($params['password']) and isset($params['password_encoded']) and $params['password_encoded']) {
-            $params['password'] = @base64_decode($params['password_encoded']);
+            $decoded_password = @base64_decode($params['password_encoded']);
+            if (!empty($decoded_password)) {
+                $params['password'] = $decoded_password;
+            } else {
+                $params['password'] = @base62_decode($params['password_encoded']);
+            }
         }
 
         $override = $this->app->event_manager->trigger('mw.user.before_login', $params);
@@ -175,6 +180,9 @@ class UserManager
         if (is_array($override)) {
             foreach ($override as $resp) {
                 if (isset($resp['error']) or isset($resp['success'])) {
+                    if (isset($resp['success']) and isset($resp['redirect']) ) {
+                        $redirect_after = $resp['redirect'];
+                    }
                     $return_resp = $resp;
                     $overiden = true;
                 }
