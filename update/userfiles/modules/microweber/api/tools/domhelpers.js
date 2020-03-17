@@ -21,15 +21,15 @@ var domHelp = {
             }
             return;
         }
-        if (!!el.className && el.className != '' && el.className != null && typeof(el.className.split) == 'function') {
+        if (!!el.className && typeof(el.className.split) === 'function') {
             var cls = el.className.split(" "), l = cls.length, i = 0, final = [];
             for (; i < l; i++) {
-                if (namespacePosition == 'contains') {
+                if (namespacePosition === 'contains') {
                     if (!cls[i].contains(namespace) || exceptions.indexOf(cls[i]) !== -1) {
                         final.push(cls[i]);
                     }
                 }
-                else if (namespacePosition == 'starts') {
+                else if (namespacePosition === 'starts') {
                     if (cls[i].indexOf(namespace) !== 0) {
                         final.push(cls[i]);
                     }
@@ -635,7 +635,7 @@ var domHelp = {
         if (node.nodeName === 'BODY') {
             return 'body';
         }
-        if (!!node.id) {
+        if (!!node.id /*&& node.id.indexOf('element_') === -1*/) {
             return '#' + node.id;
         }
         if(mw.tools.hasClass(node, 'edit')){
@@ -646,27 +646,31 @@ var domHelp = {
             }
         }
         var filter = function(item) {
-            return item !== 'changed';
+            return item !== 'changed' && item !== 'module-over' && item !== 'element-current';
         };
-        var _final = node.className != '' ? '.' + node.className.trim().split(' ').filter(filter).join('.') : node.nodeName.toLocaleLowerCase();
+        var _final = node.className.trim() ? '.' + node.className.trim().split(' ').filter(filter).join('.') : node.nodeName.toLocaleLowerCase();
 
 
         _final = _final.replace(/\.\./g, '.');
         mw.tools.foreachParents(node, function (loop) {
-            if (this.id) {
+            if (this.id /*&& node.id.indexOf('element_') === -1*/) {
                 _final = '#' + this.id + ' > ' + _final;
                 mw.tools.stopLoop(loop);
                 return false;
             }
-            if (this.className != '') {
-                var n = this.nodeName.toLocaleLowerCase() + '.' + this.className.trim().split(' ').join('.');
+            var n;
+            if (this.className.trim()) {
+                n = this.nodeName.toLocaleLowerCase() + '.' + this.className.trim().split(' ').join('.');
             }
             else {
-                var n = this.nodeName.toLocaleLowerCase();
+                n = this.nodeName.toLocaleLowerCase();
             }
             _final = n + ' > ' + _final;
         });
-        return _final;
+        return _final
+            .replace(/.changed/g, '')
+            .replace(/.element-current/g, '')
+            .replace(/.module-over/g, '');
     }
 };
 
