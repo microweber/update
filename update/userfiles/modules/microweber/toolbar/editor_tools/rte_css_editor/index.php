@@ -2,7 +2,8 @@
 
 
 
-<div id="tree"></div>
+<div id="xtree"></div>
+<div id="domtree"></div>
 
 <script type="text/javascript">
     //parent.mw.require("external_callbacks.js");
@@ -27,9 +28,10 @@
 
     $(window).on('load', function () {
 
-     /*  setTimeout(function() {
+       setTimeout(function() {
             mw.top().liveEditDomTree = new mw.DomTree({
                 element: '#domtree',
+                resizable:true,
                 targetDocument: mw.top().win.document,
                 onHover: function (e, target, node, element) {
                     mw.top().liveEditSelector.setItem(node, mw.top().liveEditSelector.interactors, false);
@@ -37,10 +39,12 @@
                 onSelect: function (e, target, node, element) {
                     setTimeout(function () {
                         mw.top().liveEditSelector.select(node);
+
+                        mw.top().tools.scrollTo(node, undefined, (mw.top().$('#live_edit_toolbar').height() + 10))
                     })
                 }
             });
-        }, 700);*/
+        }, 700);
     })
 
 </script>
@@ -257,6 +261,7 @@ var _prepare = {
 };
 var _populate = {
     margin: function(css){
+        if(!css || !css.get) return;
         var margin = css.get.margin(undefined, true);
         mw.$('.margin-top').val(parseFloat(margin.top));
         mw.$('.margin-right').val(parseFloat(margin.right));
@@ -758,7 +763,7 @@ mw.top().$(mw.top().liveEditSelector).on('select', function(e, nodes){
 
 
 
-    <div data-mwcomponent="accordion" class="mw-ui-box mw-accordion" id="size-box">
+    <div data-mwcomponent="accordion" class="mw-ui-box mw-accordion" id="size-box" style="display: none">
         <div class="mw-ui-box-header mw-accordion-title"><?php _e("Size"); ?></div>
         <div class="mw-accordion-content mw-ui-box-content">
             <div class="mw-esr-col">

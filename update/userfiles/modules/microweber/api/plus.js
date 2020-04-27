@@ -146,10 +146,10 @@ mw.drag.plus = {
     search: function (val, root) {
         var all = root.querySelectorAll('.module_name'),
             l = all.length,
-            i = 0,
-            val = val.toLowerCase(),
-            found = 0;
-        isEmpty = val.replace(/\s+/g, '') == '';
+            i = 0;
+        val = val.toLowerCase();
+        var found = 0;
+        isEmpty = val.replace(/\s+/g, '') === '';
         for (; i < l; i++) {
             var text = all[i].textContent.toLowerCase();
             if (text.contains(val) || isEmpty) {
@@ -189,9 +189,6 @@ InsertModule = function (module, cls) {
         mw.drag.fixes();
         setTimeout(function () {
             mw.drag.fix_placeholders();
-            if(mw.liveEditDomTree){
-                mw.liveEditDomTree.autoSync(node.parentNode, node);
-            }
         }, 40);
         mw.dropable.hide();
     }, cls);

@@ -578,11 +578,7 @@ mw.drag = {
                                 mw.liveEditState.record(rec);
                                 mw.$(mw.ea.data.target)[mw.ea.data.dropableAction](mw.ea.data.currentGrabbed);
 
-                                if(mw.liveEditDomTree){
-                                    mw.liveEditDomTree.sync(handleDomtreeSync.start.parentNode);
-                                    mw.liveEditDomTree.autoSync(mw.ea.data.target.parentNode, mw.ea.data.target);
-                                    handleDomtreeSync.start = null;
-                                }
+
 
 
                                 setTimeout(function(ed) {
@@ -610,6 +606,9 @@ mw.drag = {
                         setTimeout(function() {
                             mw.drag.fix_placeholders();
                             mw.ea.afterAction();
+                            if(mw.liveEditDomTree) {
+                                mw.liveEditDomTree.refresh(mw.ea.data.target.parentNode)
+                            }
                         }, 40);
                         mw.dropable.hide();
 
@@ -970,6 +969,9 @@ mw.drag = {
         mw.$('.element-active', doc).removeClass('element-active');
         mw.$('.disable-resize', doc).removeClass('disable-resize');
         mw.$('.mw-webkit-drag-hover-binded', doc).removeClass('mw-webkit-drag-hover-binded');
+        mw.$('.module-cat-toggle-Modules', doc).removeClass('module-cat-toggle-Modules');
+        mw.$('.mw-module-drag-clone', doc).removeClass('mw-module-drag-clone');
+        mw.$('-module', doc).removeClass('-module');
         mw.$('.empty-element', doc).remove();
         mw.$('.empty-element', doc).remove();
         mw.$('.edit .ui-resizable-handle', doc).remove();
