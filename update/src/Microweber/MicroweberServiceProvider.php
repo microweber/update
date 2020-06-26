@@ -238,6 +238,7 @@ class MicroweberServiceProvider extends ServiceProvider
             'layouts_manager' => 'LayoutsManager',
             'template_manager' => 'TemplateManager',
             'captcha_manager' => 'CaptchaManager',
+            'permalink_manager' => 'PermalinkManager',
         ];
 
         foreach ($providers as $alias => $class) {
@@ -279,11 +280,11 @@ class MicroweberServiceProvider extends ServiceProvider
 
             $this->commands('Microweber\Commands\OptionCommand');
 
-            $language = get_option('language', 'website');
-
-            if ($language != false) {
-                set_current_lang($language);
-            }
+//            $language = get_option('language', 'website');
+//
+//            if ($language != false) {
+//           //     set_current_lang($language);
+//            }
 
             if (is_cli()) {
 
